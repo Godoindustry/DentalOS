@@ -1,0 +1,177 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--color-bg-primary);
+  --color-foreground: var(--color-text-primary);
+  --color-primary: var(--color-primary-brand);
+  --color-primary-foreground: var(--color-primary-brand-foreground);
+  --color-secondary: var(--color-bg-tertiary);
+  --color-secondary-foreground: var(--color-text-primary);
+  --color-muted: var(--color-bg-tertiary);
+  --color-muted-foreground: var(--color-text-secondary);
+  --color-accent: var(--color-bg-tertiary);
+  --color-accent-foreground: var(--color-text-primary);
+  --color-destructive: var(--clinical-red);
+  --color-destructive-foreground: var(--color-on-destructive);
+  --color-border: var(--glass-border);
+  --color-input: var(--glass-border-strong);
+  --color-ring: var(--color-primary-brand);
+  --color-card: var(--glass-fill);
+  --color-card-foreground: var(--color-text-primary);
+  --color-popover: var(--color-popover-bg);
+  --color-popover-foreground: var(--color-text-primary);
+  --color-sidebar: var(--color-sidebar-bg);
+  --color-sidebar-foreground: var(--color-text-secondary);
+  --color-sidebar-primary: var(--color-primary-brand);
+  --color-sidebar-primary-foreground: var(--color-primary-brand-foreground);
+  --color-sidebar-accent: var(--glass-fill);
+  --color-sidebar-accent-foreground: var(--color-text-primary);
+  --color-sidebar-border: var(--glass-border);
+  --color-sidebar-ring: var(--color-primary-brand);
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --font-sans: var(--font-geist-sans, ui-sans-serif, system-ui, sans-serif);
+  --font-mono: var(--font-geist-mono, ui-monospace, SFMono-Regular, monospace);
+}
+
+/* ── Light "Clean Clinical" (default) ─────────────────────────────────────── */
+:root {
+  --color-bg-primary: #F3F9F8;
+  --color-bg-secondary: #FFFFFF;
+  --color-bg-tertiary: #E6F1F0;
+  --color-text-primary: #0B2E33;
+  --color-text-secondary: #4B6B70;
+  --color-text-muted: #7C979B;
+  --clinical-teal: #0D9488;
+  --clinical-cyan: #0284C7;
+  --clinical-emerald: #059669;
+  --clinical-amber: #D97706;
+  --clinical-red: #DC2626;
+  --clinical-lavender: #7C3AED;
+  --color-primary-brand: #0D9488;
+  --color-primary-brand-foreground: #F0FDFA;
+  --color-on-destructive: #FFFFFF;
+  --color-popover-bg: rgba(255, 255, 255, 0.98);
+  --color-sidebar-bg: rgba(255, 255, 255, 0.85);
+  --glass-fill: rgba(13, 148, 136, 0.045);
+  --glass-fill-strong: rgba(13, 148, 136, 0.085);
+  --glass-border: rgba(11, 46, 51, 0.08);
+  --glass-border-strong: rgba(11, 46, 51, 0.14);
+  --body-gradient:
+    radial-gradient(circle at 18% 0%, rgba(13, 148, 136, 0.08), transparent 30%),
+    linear-gradient(135deg, #F3F9F8 0%, #EAF4F3 48%, #F6FBFA 100%);
+}
+
+/* ── Dark "Medical Obsidian" ───────────────────────────────────────────────── */
+.dark {
+  --color-bg-primary: #002B36;
+  --color-bg-secondary: #08353E;
+  --color-bg-tertiary: #0B3D46;
+  --color-text-primary: #D8EEF0;
+  --color-text-secondary: #90AEB5;
+  --color-text-muted: #66878F;
+  --clinical-teal: #4FD1C5;
+  --clinical-cyan: #7DD3FC;
+  --clinical-emerald: #6EE7B7;
+  --clinical-amber: #FBBF77;
+  --clinical-red: #F87171;
+  --clinical-lavender: #C4B5FD;
+  --color-primary-brand: #4FD1C5;
+  --color-primary-brand-foreground: #042f34;
+  --color-on-destructive: #ffffff;
+  --color-popover-bg: rgba(8, 53, 62, 0.96);
+  --color-sidebar-bg: rgba(0, 43, 54, 0.95);
+  --glass-fill: rgba(216, 238, 240, 0.065);
+  --glass-fill-strong: rgba(216, 238, 240, 0.105);
+  --glass-border: rgba(216, 238, 240, 0.11);
+  --glass-border-strong: rgba(216, 238, 240, 0.18);
+  --body-gradient:
+    radial-gradient(circle at 18% 0%, rgba(79, 209, 197, 0.12), transparent 30%),
+    linear-gradient(135deg, #002B36 0%, #08353E 48%, #052F38 100%);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+body {
+  background: var(--body-gradient);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.glass {
+  background: var(--glass-fill);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-card {
+  background: linear-gradient(145deg, rgba(216, 238, 240, 0.085), rgba(216, 238, 240, 0.045));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035), 0 16px 42px rgba(0, 18, 24, 0.28);
+}
+
+.glass-card:hover {
+  border-color: var(--glass-border-strong);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045), 0 18px 48px rgba(0, 18, 24, 0.36);
+}
+
+.glass-input {
+  background: var(--glass-fill-strong);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border-strong);
+  border-radius: 10px;
+  color: var(--color-text-primary);
+}
+
+.glass-input:focus {
+  border-color: var(--color-primary-brand);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary-brand) 18%, transparent);
+}
+
+.glass-sidebar {
+  background: var(--color-sidebar-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid var(--glass-border);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient {
+  background-size: 200% 100%;
+  animation: gradient 4s ease infinite;
+}
