@@ -1,5 +1,8 @@
 export { OdontogramaProfissional } from "./odontograma-profissional"
 export { Odontograma } from "./odontograma"
 export { ProfessionalLayout } from "./odontograma-profissional-layout"
+export { OdontogramaSVG } from "./odontograma-svg"
+export { OdontogramaToolbar } from "./odontograma-toolbar"
 export { ProcedimentoPanel } from "./procedimento-panel"
+export { AnotacaoPanel } from "./anotacao-panel"
 export * from "./types"

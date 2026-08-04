@@ -159,7 +159,7 @@ export default function OdontogramaPage() {
                   transition={{ duration: 0.2 }}
                 >
                   {selectedPaciente ? (
-                    <ProfessionalLayout pacienteId={selectedPaciente.id} />
+                    <ProfessionalLayout pacienteId={selectedPaciente.id} nomePaciente={selectedPaciente.nome} />
                   ) : (
                     <Odontograma />
                   )}

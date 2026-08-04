@@ -69,7 +69,10 @@ export async function signupAction(_prevState: { success: boolean; error: string
     .select("id")
     .single()
 
-  if (clinicaError) return { success: false, error: "Erro ao criar clínica" }
+  if (clinicaError) {
+    console.error("[signupAction] clinicaError:", clinicaError)
+    return { success: false, error: "Erro ao criar clínica" }
+  }
 
   // 2. Tentar criar usuário via admin API
   const { data: authData, error: signUpError } = await admin.auth.admin.createUser({
