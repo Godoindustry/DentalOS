@@ -27,17 +27,122 @@ export type FaceStatus =
 
 export type ToothType = "incisor" | "canine" | "premolar" | "molar"
 
-// ─── Modo de dentição ──────────────────────────────────────────────────────────
+// ─── Modo de dentição e Visualização ──────────────────────────────────────────
 
 export type DenticaoMode = "adulto" | "infantil" | "mista"
+export type ViewMode = "dental" | "perio" | "endo"
 
-// ─── Anotação Clínica ─────────────────────────────────────────────────────────
+// ─── Periodontia (Sondagem) ──────────────────────────────────────────────────
+
+export interface PerioPoint {
+  plaque: boolean
+  bleeding: boolean
+  pus: boolean
+  calculus: boolean // Tártaro
+}
+
+export interface ProbingDepth {
+  // 6 pontos de sondagem por dente (0 a 12+ mm)
+  distoBuccal: number | null
+  buccal: number | null
+  mesioBuccal: number | null
+  distoPalatal: number | null
+  palatal: number | null
+  mesioPalatal: number | null
+}
+
+export interface PerioToothData {
+  numero: number
+  points: {
+    // 3 pontos vestibulares, 3 linguais/palatinos
+    db: PerioPoint; b: PerioPoint; mb: PerioPoint;
+    dp: PerioPoint; p: PerioPoint; mp: PerioPoint;
+  }
+  probing: ProbingDepth
+  gingivalMargin: ProbingDepth // Recessão / Hiperplasia
+}
+
+// ─── Endodontia (Testes de Vitalidade) ────────────────────────────────────────
+
+export type EndoTestKey = "cold" | "percussion" | "palpation" | "heat" | "electricity"
+
+export type EndoResult =
+  | "positive" | "negative" | "test"
+  | "within_limits" | "unpleasant" | "pain_stimulus" | "pain_lingering"
+  | null
+
+export interface EndoToothData {
+  cold: EndoResult
+  percussion: EndoResult
+  palpation: EndoResult
+  heat: EndoResult
+  electricity: EndoResult
+}
+
+export const ENDO_TEST_LABELS: Record<EndoTestKey, string> = {
+  cold: "Cold",
+  percussion: "Percussion",
+  palpation: "Palpation",
+  heat: "Heat",
+  electricity: "Electricity",
+}
+
+export const ENDO_RESULT_LABELS: Record<Exclude<EndoResult, null>, string> = {
+  positive: "Positive",
+  negative: "Negative",
+  test: "Test",
+  within_limits: "Within limits",
+  unpleasant: "Unpleasant",
+  pain_stimulus: "Pain stimulus",
+  pain_lingering: "Pain lingering",
+}
+
+export const COLD_TEST_OPTIONS: Exclude<EndoResult, null>[] = [
+  "within_limits", "unpleasant", "pain_stimulus", "pain_lingering",
+]
+export const STANDARD_TEST_OPTIONS: Exclude<EndoResult, null>[] = ["positive", "negative", "test"]
+
+// ─── Materiais de Restauração ──────────────────────────────────────────────────
+
+export type MaterialKey = "composite" | "ceramic" | "amalgam" | "gold" | "metal" | "temporary"
+
+export const MATERIAL_LABELS: Record<MaterialKey, string> = {
+  composite: "Composite",
+  ceramic: "Ceramic",
+  amalgam: "Amalgam",
+  gold: "Gold",
+  metal: "Non-Precious Metal",
+  temporary: "Temporary",
+}
+
+export type RestorationTypeKey = "filling" | "inlay" | "onlay" | "veneer" | "partial_crown" | "crown"
+
+export const RESTORATION_TYPE_LABELS: Record<RestorationTypeKey, string> = {
+  filling: "Filling",
+  inlay: "Inlay",
+  onlay: "Onlay",
+  veneer: "Veneer",
+  partial_crown: "Partial Crown",
+  crown: "Crown",
+}
+
+// ─── Anotação Clínica / Log de Procedimentos ─────────────────────────────────
+
+export type LogTipo = "missing" | "pathology" | "restoration" | "nota"
 
 export interface AnotacaoClinical {
   id: string
   toothNumber: number
   texto: string
   criadoEm: string // ISO date string
+  tipo?: LogTipo
+}
+
+export const LOG_TIPO_COR: Record<LogTipo, string> = {
+  missing:     "#94A3B8",
+  pathology:   "#EF4444",
+  restoration: "#3B82F6",
+  nota:        "#F59E0B",
 }
 
 // ─── Estrutura de dados do dente ─────────────────────────────────────────────

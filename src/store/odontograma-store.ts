@@ -1,5 +1,9 @@
 import { create } from "zustand"
-import type { DenteData, FaceId, FaceStatus, DenticaoMode, AnotacaoClinical } from "@/components/odontograma/types"
+import type {
+  DenteData, FaceId, FaceStatus, DenticaoMode, AnotacaoClinical,
+  ViewMode, PerioToothData, PerioPoint, EndoToothData, EndoTestKey, EndoResult,
+  LogTipo,
+} from "@/components/odontograma/types"
 import {
   criarDente, SUPERIORES, INFERIORES, DECIDUOS_SUP, DECIDUOS_INF,
   MISTA_SUP, MISTA_INF, dentesParaDB,
@@ -31,15 +35,27 @@ interface OdontogramaStore {
   selectedTooth: number | null
   activeProcedure: FaceStatus | null
 
+  // Modo de visualização principal (Dental, Perio, Endo)
+  viewMode: ViewMode
+
   // Modo de dentição
   denticaoMode: DenticaoMode
 
   // Histórico (undo/redo)
   historico: OdontogramaSnapshot[]
   historicoFuturo: OdontogramaSnapshot[]
+  
+  // Snapshots de Data para o Timeline/Rollback
+  timelineSnapshots: any[]
 
   // Anotações clínicas por dente
   anotacoes: Record<number, AnotacaoClinical[]>
+
+  // Dados Periodontais
+  perioData: Record<number, PerioToothData>
+
+  // Dados Endodônticos (testes de vitalidade)
+  endoData: Record<number, EndoToothData>
 
   // Status de salvamento
   saving: boolean
@@ -49,19 +65,25 @@ interface OdontogramaStore {
   // ── Actions ──────────────────────────────────────────────────────────────────
   initFromDb: (db: DentesDB) => void
   setPacienteIdAtual: (id: string) => void
+  setViewMode: (mode: ViewMode) => void
   setSelectedFace: (sel: SeletorFace | null) => void
   setSelectedTooth: (numero: number | null) => void
   setActiveProcedure: (p: FaceStatus | null) => void
   setDenticaoMode: (mode: DenticaoMode) => void
   applyProcedure: (numero: number, face: FaceId, procedimento: FaceStatus) => void
+  updatePerioPoint: (numero: number, position: keyof PerioToothData["points"], field: keyof PerioPoint, value: boolean) => void
+  updateProbingDepth: (numero: number, isMargin: boolean, position: keyof PerioToothData["probing"], value: number | null) => void
+  updateEndoTest: (numero: number, test: EndoTestKey, value: EndoResult) => void
   toggleImplante: (numero: number) => void
   toggleExtracao: (numero: number) => void
+  resetDente: (numero: number) => void
   undo: () => void
   redo: () => void
-  addAnotacao: (numero: number, texto: string) => void
+  addAnotacao: (numero: number, texto: string, tipo?: LogTipo) => void
   removeAnotacao: (numero: number, id: string) => void
   setSaving: (v: boolean) => void
   getDente: (numero: number) => DenteData | undefined
+  nextTooth: (numero: number) => number | null
   schedulePersist: (pacienteId: string) => void
 }
 
@@ -100,6 +122,22 @@ function clonarArcadas(sup: DenteData[], inf: DenteData[]): OdontogramaSnapshot 
   }
 }
 
+function createEmptyPerioPoint(): PerioPoint {
+  return { plaque: false, bleeding: false, pus: false, calculus: false }
+}
+
+function createEmptyPerioData(numero: number): PerioToothData {
+  return {
+    numero,
+    points: {
+      db: createEmptyPerioPoint(), b: createEmptyPerioPoint(), mb: createEmptyPerioPoint(),
+      dp: createEmptyPerioPoint(), p: createEmptyPerioPoint(), mp: createEmptyPerioPoint()
+    },
+    probing: { distoBuccal: null, buccal: null, mesioBuccal: null, distoPalatal: null, palatal: null, mesioPalatal: null },
+    gingivalMargin: { distoBuccal: null, buccal: null, mesioBuccal: null, distoPalatal: null, palatal: null, mesioPalatal: null }
+  }
+}
+
 // ─── Debounce para persist ────────────────────────────────────────────────────
 
 let persistTimer: ReturnType<typeof setTimeout> | null = null
@@ -128,15 +166,23 @@ async function doPersist(
 const MAX_HISTORICO = 50
 
 export const useOdontogramaStore = create<OdontogramaStore>((set, get) => ({
-  arcadaSup: SUPERIORES.map(criarDente),
-  arcadaInf: INFERIORES.map(criarDente),
+  arcadaSup: gerarArcadas("adulto").arcadaSup,
+  arcadaInf: gerarArcadas("adulto").arcadaInf,
+
   selectedFace: null,
   selectedTooth: null,
   activeProcedure: null,
+  
+  viewMode: "dental",
   denticaoMode: "adulto",
+
   historico: [],
   historicoFuturo: [],
+  timelineSnapshots: [],
   anotacoes: {},
+  perioData: {},
+  endoData: {},
+
   saving: false,
   loaded: false,
   pacienteIdAtual: null,
@@ -144,6 +190,7 @@ export const useOdontogramaStore = create<OdontogramaStore>((set, get) => ({
   // ── Inicialização ──────────────────────────────────────────────────────────
 
   setPacienteIdAtual: (id) => set({ pacienteIdAtual: id }),
+  setViewMode: (mode) => set({ viewMode: mode, selectedTooth: null, selectedFace: null }),
 
   initFromDb: (db: DentesDB) => {
     const parseDente = (n: number) => {
@@ -225,6 +272,44 @@ export const useOdontogramaStore = create<OdontogramaStore>((set, get) => ({
     }))
   },
 
+  // ── Periodontia ─────────────────────────────────────────────────────────────
+
+  updatePerioPoint: (numero, position, field, value) => {
+    set((state) => {
+      const pData = state.perioData[numero] || createEmptyPerioData(numero)
+      const novoPData = { 
+        ...pData, 
+        points: { 
+          ...pData.points, 
+          [position]: { ...pData.points[position], [field]: value } 
+        } 
+      }
+      return { perioData: { ...state.perioData, [numero]: novoPData } }
+    })
+  },
+
+  updateProbingDepth: (numero, isMargin, position, value) => {
+    set((state) => {
+      const pData = state.perioData[numero] || createEmptyPerioData(numero)
+      const target = isMargin ? "gingivalMargin" : "probing"
+      const novoPData = {
+        ...pData,
+        [target]: { ...pData[target], [position]: value }
+      }
+      return { perioData: { ...state.perioData, [numero]: novoPData } }
+    })
+  },
+
+  // ── Endodontia ─────────────────────────────────────────────────────────────
+
+  updateEndoTest: (numero, test, value) => {
+    set((state) => {
+      const empty: EndoToothData = { cold: null, percussion: null, palpation: null, heat: null, electricity: null }
+      const eData = state.endoData[numero] || empty
+      return { endoData: { ...state.endoData, [numero]: { ...eData, [test]: value } } }
+    })
+  },
+
   // ── Implante / Extração ─────────────────────────────────────────────────────
 
   toggleImplante: (numero) => {
@@ -259,6 +344,27 @@ export const useOdontogramaStore = create<OdontogramaStore>((set, get) => ({
     }))
   },
 
+  resetDente: (numero) => {
+    const { arcadaSup, arcadaInf } = get()
+    const snapshot = clonarArcadas(arcadaSup, arcadaInf)
+    const sup = arcadaSup.map((d) => ({ ...d, faces: d.faces.map((f) => ({ ...f })) }))
+    const inf = arcadaInf.map((d) => ({ ...d, faces: d.faces.map((f) => ({ ...f })) }))
+    const dente = [...sup, ...inf].find((d) => d.numero === numero)
+    if (!dente) return
+    dente.ausente = false
+    dente.implante = false
+    dente.coroa = false
+    dente.extracao = false
+    dente.faces.forEach((f) => { f.status = "saudavel"; f.observacoes = undefined })
+    set((s) => ({
+      arcadaSup: sup,
+      arcadaInf: inf,
+      historico: [...s.historico.slice(-MAX_HISTORICO + 1), snapshot],
+      historicoFuturo: [],
+      anotacoes: { ...s.anotacoes, [numero]: [] },
+    }))
+  },
+
   // ── Undo / Redo ────────────────────────────────────────────────────────────
 
   undo: () => {
@@ -289,13 +395,14 @@ export const useOdontogramaStore = create<OdontogramaStore>((set, get) => ({
 
   // ── Anotações Clínicas ─────────────────────────────────────────────────────
 
-  addAnotacao: (numero, texto) => {
+  addAnotacao: (numero, texto, tipo) => {
     if (!texto.trim()) return
     const nova: AnotacaoClinical = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
       toothNumber: numero,
       texto: texto.trim(),
       criadoEm: new Date().toISOString(),
+      tipo,
     }
     set((s) => ({
       anotacoes: {
@@ -320,6 +427,14 @@ export const useOdontogramaStore = create<OdontogramaStore>((set, get) => ({
 
   getDente: (numero) =>
     [...get().arcadaSup, ...get().arcadaInf].find((d) => d.numero === numero),
+
+  nextTooth: (numero) => {
+    const { arcadaSup, arcadaInf } = get()
+    const sequence = [...arcadaSup, ...arcadaInf].map((d) => d.numero)
+    const idx = sequence.indexOf(numero)
+    if (idx === -1 || idx === sequence.length - 1) return null
+    return sequence[idx + 1]
+  },
 
   schedulePersist: (pacienteId) => {
     if (persistTimer) clearTimeout(persistTimer)

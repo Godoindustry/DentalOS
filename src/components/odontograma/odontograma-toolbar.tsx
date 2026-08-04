@@ -3,14 +3,12 @@
 import { useCallback, useEffect } from "react"
 import { motion } from "framer-motion"
 import {
-  Undo2, Redo2, Baby, User, Shuffle, Search,
-  Download, FileJson, Loader2,
+  Undo2, Redo2, Baby, User, Shuffle,
+  Search, Download, FileJson, Loader2,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useOdontogramaStore } from "@/store/odontograma-store"
 import type { DenticaoMode } from "./types"
-
-// ─── Props ────────────────────────────────────────────────────────────────────
 
 interface OdontogramaToolbarProps {
   searchTerm: string
@@ -19,42 +17,18 @@ interface OdontogramaToolbarProps {
   onExportJSON: () => void
 }
 
-// ─── Sub-componente: botão de dentição ────────────────────────────────────────
-
-function DenticaoBtn({
-  mode, label, icon: Icon, active, onClick,
-}: {
+const MODO_ITEMS: {
   mode: DenticaoMode
   label: string
   icon: React.ComponentType<{ className?: string }>
-  active: boolean
-  onClick: () => void
-}) {
-  return (
-    <motion.button
-      onClick={onClick}
-      whileTap={{ scale: 0.95 }}
-      className={cn(
-        "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium border transition-all",
-        active
-          ? "border-purple-500/50 bg-purple-500/20 text-purple-200 shadow-[0_0_12px_rgba(168,85,247,0.2)]"
-          : "border-white/[0.07] bg-white/[0.03] text-white/50 hover:bg-white/[0.07] hover:text-white/80",
-      )}
-      title={label}
-    >
-      <Icon className="h-3.5 w-3.5" />
-      <span className="hidden sm:inline">{label}</span>
-    </motion.button>
-  )
-}
-
-// ─── Componente principal ────────────────────────────────────────────────────
+}[] = [
+  { mode: "adulto",   label: "Adulto",   icon: User    },
+  { mode: "infantil", label: "Infantil", icon: Baby    },
+  { mode: "mista",    label: "Mista",    icon: Shuffle },
+]
 
 export function OdontogramaToolbar({
-  searchTerm,
-  onSearchChange,
-  onExportPDF,
-  onExportJSON,
+  searchTerm, onSearchChange, onExportPDF, onExportJSON,
 }: OdontogramaToolbarProps) {
   const denticaoMode    = useOdontogramaStore((s) => s.denticaoMode)
   const historico       = useOdontogramaStore((s) => s.historico)
@@ -67,18 +41,14 @@ export function OdontogramaToolbar({
   const canUndo = historico.length > 0
   const canRedo = historicoFuturo.length > 0
 
-  // Atalhos de teclado Ctrl+Z / Ctrl+Y
+  // Ctrl+Z / Ctrl+Y
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement).tagName
       if (tag === "INPUT" || tag === "TEXTAREA") return
-
-      if (e.ctrlKey && e.key === "z" && !e.shiftKey) {
-        e.preventDefault()
-        undo()
-      } else if ((e.ctrlKey && e.key === "y") || (e.ctrlKey && e.shiftKey && e.key === "z")) {
-        e.preventDefault()
-        redo()
+      if (e.ctrlKey && e.key === "z" && !e.shiftKey) { e.preventDefault(); undo() }
+      if ((e.ctrlKey && e.key === "y") || (e.ctrlKey && e.shiftKey && e.key === "z")) {
+        e.preventDefault(); redo()
       }
     }
     window.addEventListener("keydown", handler)
@@ -86,120 +56,96 @@ export function OdontogramaToolbar({
   }, [undo, redo])
 
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.025] backdrop-blur-sm px-3 py-2.5">
+    <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
 
-      {/* ── Grupo: Dentição ──────────────────────────────────────────────── */}
-      <div className="flex items-center gap-1.5">
-        <DenticaoBtn
-          mode="adulto"
-          label="Adulto"
-          icon={User}
-          active={denticaoMode === "adulto"}
-          onClick={() => setDenticaoMode("adulto")}
-        />
-        <DenticaoBtn
-          mode="infantil"
-          label="Infantil"
-          icon={Baby}
-          active={denticaoMode === "infantil"}
-          onClick={() => setDenticaoMode("infantil")}
-        />
-        <DenticaoBtn
-          mode="mista"
-          label="Mista"
-          icon={Shuffle}
-          active={denticaoMode === "mista"}
-          onClick={() => setDenticaoMode("mista")}
-        />
+      {/* ── Modo de dentição ────────────────────────────────────────────── */}
+      <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+        {MODO_ITEMS.map(({ mode, label, icon: Icon }) => (
+          <button
+            key={mode}
+            onClick={() => setDenticaoMode(mode)}
+            title={label}
+            className={cn(
+              "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all",
+              denticaoMode === mode
+                ? "bg-white text-blue-700 shadow-sm border border-slate-200"
+                : "text-slate-500 hover:text-slate-700",
+            )}
+          >
+            <Icon className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">{label}</span>
+          </button>
+        ))}
       </div>
 
-      <div className="h-5 w-px bg-white/10 mx-0.5 hidden sm:block" />
+      <div className="h-5 w-px bg-slate-200 hidden sm:block" />
 
-      {/* ── Grupo: Undo / Redo ───────────────────────────────────────────── */}
+      {/* ── Undo / Redo ─────────────────────────────────────────────────── */}
       <div className="flex items-center gap-1">
-        <motion.button
-          onClick={undo}
-          disabled={!canUndo}
-          whileTap={{ scale: canUndo ? 0.92 : 1 }}
-          className={cn(
-            "flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs border transition-all",
-            canUndo
-              ? "border-white/[0.08] bg-white/[0.03] text-white/60 hover:bg-white/[0.08] hover:text-white/90 cursor-pointer"
-              : "border-white/[0.03] text-white/20 cursor-not-allowed",
-          )}
-          title={`Desfazer (Ctrl+Z) — ${historico.length} passo${historico.length !== 1 ? "s" : ""}`}
-        >
-          <Undo2 className="h-3.5 w-3.5" />
-          {historico.length > 0 && (
-            <span className="text-[10px] font-mono text-white/40">{historico.length}</span>
-          )}
-        </motion.button>
-
-        <motion.button
-          onClick={redo}
-          disabled={!canRedo}
-          whileTap={{ scale: canRedo ? 0.92 : 1 }}
-          className={cn(
-            "flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs border transition-all",
-            canRedo
-              ? "border-white/[0.08] bg-white/[0.03] text-white/60 hover:bg-white/[0.08] hover:text-white/90 cursor-pointer"
-              : "border-white/[0.03] text-white/20 cursor-not-allowed",
-          )}
-          title={`Refazer (Ctrl+Y) — ${historicoFuturo.length} passo${historicoFuturo.length !== 1 ? "s" : ""}`}
-        >
-          <Redo2 className="h-3.5 w-3.5" />
-          {historicoFuturo.length > 0 && (
-            <span className="text-[10px] font-mono text-white/40">{historicoFuturo.length}</span>
-          )}
-        </motion.button>
+        {([
+          { fn: undo, can: canUndo, icon: Undo2,  steps: historico.length,       title: "Desfazer (Ctrl+Z)" },
+          { fn: redo, can: canRedo, icon: Redo2,  steps: historicoFuturo.length, title: "Refazer (Ctrl+Y)" },
+        ] as const).map(({ fn, can, icon: Icon, steps, title }) => (
+          <button
+            key={title}
+            onClick={fn as () => void}
+            disabled={!can}
+            title={`${title} — ${steps} passo${steps !== 1 ? "s" : ""}`}
+            className={cn(
+              "flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs transition-all",
+              can
+                ? "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
+                : "border-slate-100 bg-slate-50 text-slate-300 cursor-not-allowed",
+            )}
+          >
+            <Icon className="h-3.5 w-3.5" />
+            {steps > 0 && (
+              <span className="font-mono text-[10px] text-slate-400">{steps}</span>
+            )}
+          </button>
+        ))}
       </div>
 
-      <div className="h-5 w-px bg-white/10 mx-0.5 hidden sm:block" />
+      <div className="h-5 w-px bg-slate-200 hidden sm:block" />
 
-      {/* ── Grupo: Busca ─────────────────────────────────────────────────── */}
-      <div className="relative flex-1 min-w-[120px] max-w-[220px]">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30 pointer-events-none" />
+      {/* ── Busca ───────────────────────────────────────────────────────── */}
+      <div className="relative flex-1 min-w-[130px] max-w-[220px]">
+        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Buscar dente... ex: 16"
-          className="w-full rounded-lg bg-white/[0.04] border border-white/[0.07] pl-8 pr-3 py-1.5 text-xs text-white/80 placeholder:text-white/25 outline-none focus:border-purple-500/40 focus:bg-purple-500/5 transition-all"
+          placeholder="Buscar dente… ex: 16"
+          className="w-full rounded-lg border border-slate-200 bg-slate-50 pl-8 pr-3 py-1.5 text-xs text-slate-700 placeholder:text-slate-400 outline-none focus:border-blue-400 focus:bg-white transition-all"
         />
       </div>
 
-      {/* ── Spacer ───────────────────────────────────────────────────────── */}
       <div className="flex-1" />
 
-      {/* ── Status salvando ──────────────────────────────────────────────── */}
+      {/* ── Salvando ────────────────────────────────────────────────────── */}
       {saving && (
-        <div className="flex items-center gap-1.5 text-[10px] text-white/30">
+        <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
           <Loader2 className="h-3 w-3 animate-spin" />
           <span className="hidden sm:inline">Salvando...</span>
         </div>
       )}
 
-      {/* ── Grupo: Exportação ────────────────────────────────────────────── */}
+      {/* ── Exportação ──────────────────────────────────────────────────── */}
       <div className="flex items-center gap-1">
-        <motion.button
-          onClick={onExportJSON}
-          whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs border border-white/[0.07] bg-white/[0.03] text-white/50 hover:bg-white/[0.07] hover:text-white/80 transition-all"
-          title="Exportar JSON (backup)"
-        >
-          <FileJson className="h-3.5 w-3.5" />
-          <span className="hidden md:inline">JSON</span>
-        </motion.button>
-
-        <motion.button
-          onClick={onExportPDF}
-          whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs border border-white/[0.07] bg-white/[0.03] text-white/50 hover:bg-white/[0.07] hover:text-white/80 transition-all"
-          title="Exportar / Imprimir PDF"
-        >
-          <Download className="h-3.5 w-3.5" />
-          <span className="hidden md:inline">PDF</span>
-        </motion.button>
+        {([
+          { fn: onExportJSON, icon: FileJson,  label: "JSON", title: "Exportar JSON (backup)" },
+          { fn: onExportPDF,  icon: Download,  label: "PDF",  title: "Exportar / Imprimir PDF" },
+        ] as const).map(({ fn, icon: Icon, label, title }) => (
+          <button
+            key={label}
+            onClick={fn as () => void}
+            title={title}
+            className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800 transition-all"
+          >
+            <Icon className="h-3.5 w-3.5" />
+            <span className="hidden md:inline">{label}</span>
+          </button>
+        ))}
       </div>
     </div>
   )

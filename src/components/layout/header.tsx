@@ -1,10 +1,11 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
-import { Bell, ChevronDown, LogOut, MapPin, Menu, MessageCircle, Moon, Settings, Sun } from "lucide-react"
+import { Bell, ChevronDown, LogOut, MapPin, Menu, MessageCircle, Moon, Settings, Sun, Search } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -53,6 +54,24 @@ export function Header() {
   const [showNotifications, setShowNotifications] = useState(false)
   const [usuario, setUsuario] = useState({ nome: "Usuario", especialidade: "Profissional" })
   const { collapsed, setCollapsed } = useSidebar()
+  const router = useRouter()
+  const searchInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    const handleShortcut = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
+    }
+    window.addEventListener("keydown", handleShortcut)
+    return () => window.removeEventListener("keydown", handleShortcut)
+  }, [])
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    router.push("/login")
+  }
 
   useEffect(() => {
     const loadUsuario = async () => {
@@ -85,26 +104,38 @@ export function Header() {
   ), [usuario.nome])
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background/80 px-4 backdrop-blur-md md:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-slate-200 bg-white/90 px-4 backdrop-blur-md md:px-6">
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-all hover:bg-accent hover:text-foreground"
+        className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-800"
       >
         <Menu className="h-5 w-5" />
       </button>
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <MapPin className="h-4 w-4" />
-        <span>Clinica</span>
-      </div>
 
-      <div className="flex-1" />
+      {/* Global Search Bar */}
+      <div className="flex-1 max-w-2xl mx-auto flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-xl border border-transparent focus-within:border-teal-500 focus-within:bg-white transition-all shadow-inner">
+        <Search className="w-4 h-4 text-slate-400" />
+        <input
+          ref={searchInputRef}
+          type="text"
+          placeholder="Buscar paciente, procedimento, agendamento... (⌘K)"
+          className="flex-1 bg-transparent border-none outline-none text-sm text-slate-700 placeholder:text-slate-400"
+        />
+        <div className="hidden sm:flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-white border border-slate-200 text-[10px] font-bold text-slate-400 shadow-sm">
+          ⌘K
+        </div>
+      </div>
 
       <div className="flex items-center gap-2">
         <ThemeToggle />
 
-        <button className="relative flex h-10 w-10 items-center justify-center rounded-xl text-muted-foreground transition-all hover:bg-accent hover:text-foreground">
+        <Link
+          href="/bot"
+          className="relative flex h-10 w-10 items-center justify-center rounded-xl text-muted-foreground transition-all hover:bg-accent hover:text-foreground"
+          aria-label="Assistente Virtual"
+        >
           <MessageCircle className="h-5 w-5" />
-        </button>
+        </Link>
 
         <div className="relative">
           <button
@@ -134,17 +165,17 @@ export function Header() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-1.5 transition-all hover:bg-accent">
+            <button className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white shadow-sm px-3 py-1.5 transition-all hover:bg-slate-50">
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-primary/20 text-xs font-medium text-primary">
+                <AvatarFallback className="bg-teal-500/10 text-xs font-bold text-teal-600">
                   {initials}
                 </AvatarFallback>
               </Avatar>
               <div className="hidden text-left sm:block">
-                <p className="text-sm font-medium leading-tight text-foreground">{usuario.nome}</p>
-                <p className="text-xs text-muted-foreground">{usuario.especialidade}</p>
+                <p className="text-sm font-semibold leading-tight text-slate-800 truncate max-w-[140px]">{usuario.nome}</p>
+                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider truncate max-w-[140px]">{usuario.especialidade}</p>
               </div>
-              <ChevronDown className="hidden h-4 w-4 text-muted-foreground sm:block" />
+              <ChevronDown className="hidden h-4 w-4 text-slate-400 sm:block" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 border-border bg-popover backdrop-blur-xl">
@@ -156,11 +187,12 @@ export function Header() {
                 Configuracoes
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild className="text-muted-foreground focus:bg-accent focus:text-foreground">
-              <Link href="/login" className="flex items-center gap-2">
-                <LogOut className="h-4 w-4" />
-                Sair
-              </Link>
+            <DropdownMenuItem
+              onSelect={handleSignOut}
+              className="flex items-center gap-2 text-muted-foreground focus:bg-accent focus:text-foreground cursor-pointer"
+            >
+              <LogOut className="h-4 w-4" />
+              Sair
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

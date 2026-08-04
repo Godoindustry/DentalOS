@@ -31,8 +31,8 @@ interface AnotacaoPanelProps {
 // ─── Componente ───────────────────────────────────────────────────────────────
 
 export function AnotacaoPanel({ toothNumber }: AnotacaoPanelProps) {
-  const anotacoes    = useOdontogramaStore((s) => s.anotacoes[toothNumber] ?? [])
-  const addAnotacao  = useOdontogramaStore((s) => s.addAnotacao)
+  const anotacoes = useOdontogramaStore((s) => s.anotacoes[toothNumber]) ?? []
+  const addAnotacao = useOdontogramaStore((s) => s.addAnotacao)
   const removeAnotacao = useOdontogramaStore((s) => s.removeAnotacao)
 
   const [texto, setTexto]       = useState("")
