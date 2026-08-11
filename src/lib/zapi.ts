@@ -74,6 +74,14 @@ export async function getInstanceStatus() {
   if (!ZAPI_INSTANCE_ID || !ZAPI_TOKEN) {
     return { error: "Z-API credentials missing" };
   }
-  const response = await fetch(`${ZAPI_BASE_URL}/status`, { headers: zapiHeaders() });
-  return { data: await response.json() };
+  try {
+    const response = await fetch(`${ZAPI_BASE_URL}/status`, { headers: zapiHeaders() });
+    if (!response.ok) {
+      return { error: `HTTP ${response.status}` };
+    }
+    return { data: await response.json() };
+  } catch (error) {
+    console.error("Exception getting Z-API instance status:", error);
+    return { error };
+  }
 }

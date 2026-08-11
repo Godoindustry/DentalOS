@@ -7,18 +7,33 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  // Deixa server actions passarem sem auth (o auth é verificado dentro da action)
-  const isServerAction = request.headers.has("Next-Action") || request.headers.has("next-action")
+  const isServerAction = request.headers.has("Next-Action") || request.headers.has("next-action") || pathname.startsWith("/_next/action")
   if (isServerAction) return response
+
+  const isApiRoute = pathname.startsWith("/api")
+  const isStaticAsset =
+    pathname.startsWith("/_next/static") ||
+    pathname.startsWith("/_next/image") ||
+    pathname.startsWith("/_next/action") ||
+    pathname === "/favicon.ico" ||
+    pathname === "/favicon.png" ||
+    pathname === "/manifest.json" ||
+    pathname === "/robots.txt" ||
+    pathname === "/sitemap.xml" ||
+    pathname.startsWith("/apple-touch-icon") ||
+    pathname.startsWith("/android-chrome-") ||
+    pathname.startsWith("/mstile-") ||
+    pathname.startsWith("/safari-pinned-tab") ||
+    /\.[a-zA-Z0-9]+$/.test(pathname)
+
+  if (isApiRoute || isStaticAsset) {
+    return response
+  }
 
   const publicPaths = ["/", "/login", "/cadastro", "/landing"]
   const isPublicPath = publicPaths.some((p) => pathname === p || pathname.startsWith(p + "/"))
-  const isStaticFile =
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/api") ||
-    pathname === "/favicon.ico"
 
-  if (isPublicPath || isStaticFile) {
+  if (isPublicPath) {
     if (pathname === "/" || pathname === "/login" || pathname === "/cadastro") {
       const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -66,5 +81,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|_next/action|favicon\\.ico|favicon\\.png|manifest\\.json|robots\\.txt|sitemap\\.xml|apple-touch-icon|android-chrome-|mstile-|safari-pinned-tab).*)"],
 }

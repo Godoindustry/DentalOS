@@ -10,14 +10,22 @@ const UF_SET = new Set<string>(UFS_BRASIL)
 export async function loginAction(_prevState: { error: string } | null, formData: FormData) {
   const supabase = await createClient()
 
+  const email = formData.get("email") as string
+  const password = formData.get("password") as string
+
+  if (!email || !password) return { error: "E-mail e senha são obrigatórios" }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "E-mail inválido" }
+
   const { error } = await supabase.auth.signInWithPassword({
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
+    email,
+    password,
   })
   if (error) return { error: error.message }
 
-  const { data: { user } } = await supabase.auth.getUser()
-  const clinicaId = user?.user_metadata?.clinica_id
+  const { data } = await supabase.auth.getUser()
+  const user = data.user
+  if (!user) return { error: "Não foi possível validar a sessão após o login" }
+  const clinicaId = user.user_metadata?.clinica_id
 
   const admin = createAdminClient()
 
@@ -36,8 +44,8 @@ export async function loginAction(_prevState: { error: string } | null, formData
         .select("id")
         .single()
       if (newClinica) {
-        await admin.auth.admin.updateUserById(user!.id, {
-          user_metadata: { ...user!.user_metadata, clinica_id: newClinica.id },
+        await admin.auth.admin.updateUserById(user.id, {
+          user_metadata: { ...user.user_metadata, clinica_id: newClinica.id },
         })
         precisaAtualizarSessao = true
       }
@@ -49,16 +57,13 @@ export async function loginAction(_prevState: { error: string } | null, formData
       .select("id")
       .single()
     if (clinica) {
-      await admin.auth.admin.updateUserById(user!.id, {
-        user_metadata: { ...user!.user_metadata, clinica_id: clinica.id },
+      await admin.auth.admin.updateUserById(user.id, {
+        user_metadata: { ...user.user_metadata, clinica_id: clinica.id },
       })
       precisaAtualizarSessao = true
     }
   }
 
-  // O token de sessão já emitido não reflete o clinica_id recém-atribuído
-  // via admin API; sem isso, as políticas de RLS (que leem o JWT) não
-  // encontram a clínica e as consultas voltam vazias em silêncio.
   if (precisaAtualizarSessao) {
     await supabase.auth.refreshSession()
   }
@@ -74,6 +79,7 @@ export async function signupAction(_prevState: { success: boolean; error: string
   const ufCro = (formData.get("uf_cro") as string || "").trim().toUpperCase()
 
   if (!nome || !email || !password || !cro || !ufCro) return { success: false, error: "Preencha todos os campos" }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { success: false, error: "E-mail inválido" }
   if (password.length < 6) return { success: false, error: "A senha deve ter no mínimo 6 caracteres" }
   if (!/^\d{3,6}$/.test(cro)) return { success: false, error: "CRO deve conter de 3 a 6 dígitos numéricos" }
   if (!UF_SET.has(ufCro)) return { success: false, error: "UF do CRO inválida" }
@@ -137,7 +143,7 @@ export async function signupAction(_prevState: { success: boolean; error: string
   const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
 
   if (signInError) {
-    return { success: true, error: "", email }
+    return { success: false, error: "Conta criada, mas não foi possível entrar automaticamente. Vá para o login." }
   }
 
   redirect("/dashboard")

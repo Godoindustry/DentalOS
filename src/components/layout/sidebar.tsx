@@ -38,8 +38,6 @@ const sidebarItems = [
   { title: "Configurações", href: "/configuracoes", icon: Settings },
 ]
 
-const supabase = createClient()
-
 export function Sidebar() {
   const { collapsed, setCollapsed } = useSidebar()
   const pathname = usePathname()
@@ -48,6 +46,7 @@ export function Sidebar() {
 
   useEffect(() => {
     setMounted(true)
+    const supabase = createClient()
     supabase.from("clinicas").select("nome_fantasia").limit(1).maybeSingle().then(({ data }) => {
       if (data?.nome_fantasia) setNomeClinica(data.nome_fantasia)
     })

@@ -23,6 +23,7 @@ function useSupabaseQuery<T>(
 
   const fetch = useCallback(async () => {
     setLoading(true)
+    setError(null)
     const query = supabase.from(table).select("*")
     if (options?.order) {
       query.order(options.order, { ascending: options.ascending ?? true })
@@ -56,11 +57,14 @@ export function useProcedimento(id: string) {
   const supabase = createClient()
 
   useEffect(() => {
+    let cancelled = false
     supabase.from("procedimentos").select("*").eq("id", id).single().then(({ data, error }) => {
+      if (cancelled) return
       if (error) console.error(error)
       else setData(data as Procedimento)
       setLoading(false)
     })
+    return () => { cancelled = true }
   }, [id])
 
   return { data, loading }
@@ -72,11 +76,14 @@ export function useProfissional(id: string) {
   const supabase = createClient()
 
   useEffect(() => {
+    let cancelled = false
     supabase.from("profissionais").select("*").eq("id", id).single().then(({ data, error }) => {
+      if (cancelled) return
       if (error) console.error(error)
       else setData(data as Profissional)
       setLoading(false)
     })
+    return () => { cancelled = true }
   }, [id])
 
   return { data, loading }
@@ -131,11 +138,14 @@ export function usePaciente(id: string) {
   const supabase = createClient()
 
   useEffect(() => {
+    let cancelled = false
     supabase.from("pacientes").select("*").eq("id", id).single().then(({ data, error }) => {
+      if (cancelled) return
       if (error) console.error(error)
       else setData(data as Paciente)
       setLoading(false)
     })
+    return () => { cancelled = true }
   }, [id])
 
   return { data, loading }
@@ -399,15 +409,18 @@ export function useConversasRecentes(limit = 20) {
   const supabase = createClient()
 
   useEffect(() => {
+    let cancelled = false
     supabase
       .from("conversas_bot")
       .select("*, pacientes_potenciais(nome, telefone, status, canal)")
       .order("created_at", { ascending: false })
       .limit(limit)
       .then(({ data: rows }) => {
+        if (cancelled) return
         setData(rows as any[] ?? [])
         setLoading(false)
       })
+    return () => { cancelled = true }
   }, [limit])
 
   return { data, loading }

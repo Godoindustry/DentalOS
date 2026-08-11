@@ -1,4 +1,4 @@
-import { createServerClient } from "@supabase/ssr"
+import { createServerClient, type CookieOptions } from "@supabase/ssr"
 import { cookies } from "next/headers"
 
 export async function createClient() {
@@ -15,10 +15,13 @@ export async function createClient() {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+              cookieStore.set(name, value, options as CookieOptions)
             )
           } catch {
-            // Called from Server Component - ignore
+            // Chamado a partir de um Server Component (não Server Action/
+            // Route Handler) — cookies() não pode ser escrito aqui, e isso
+            // é esperado. O middleware (proxy.ts) já cuida de renovar a
+            // sessão nesses casos.
           }
         },
       },

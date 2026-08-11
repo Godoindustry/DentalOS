@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
+import { createClient } from "@/lib/supabase/server"
+import { rateLimit, getClientIp } from "@/lib/rate-limit"
 
 export async function POST(req: Request) {
+  const clientIp = getClientIp(req)
+
+  if (!rateLimit(`lead:${clientIp}`, 5, 60_000)) {
+    return NextResponse.json({ error: "Muitas requisições. Tente novamente em 1 minuto." }, { status: 429 })
+  }
+
   try {
     const { nome, email, telefone, cadeiras } = await req.json()
 
@@ -9,17 +16,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Campos obrigatórios faltando" }, { status: 400 })
     }
 
-    const adminClient = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    )
-
-    const { error } = await adminClient.from("leads").insert({
-      nome,
-      email,
-      telefone,
-      cadeiras: parseInt(cadeiras),
+    const admin = await createClient()
+    const { error } = await admin.from("leads").insert({
+      nome: String(nome).trim(),
+      email: String(email).trim(),
+      telefone: String(telefone).trim(),
+      cadeiras: Math.max(1, parseInt(String(cadeiras), 10) || 1),
     })
 
     if (error) {

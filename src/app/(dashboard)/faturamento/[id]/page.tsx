@@ -37,21 +37,25 @@ export default function DetalhesFaturamentoPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let cancelled = false
     supabase
       .from("faturamento")
       .select("*, pacientes (nome), procedimentos (nome_servico), profissionais (nome)")
       .eq("id", id)
       .single()
       .then(({ data, error }) => {
+        if (cancelled) return
         if (data) setFat(data)
         setLoading(false)
       })
     supabase.from("clinicas").select("nome_fantasia, cnpj").single().then(({ data }) => {
+      if (cancelled) return
       if (data) {
         setClinicaNome(data.nome_fantasia)
         setClinicaCnpj(data.cnpj ?? "")
       }
     })
+    return () => { cancelled = true }
   }, [id])
 
   if (loading) {

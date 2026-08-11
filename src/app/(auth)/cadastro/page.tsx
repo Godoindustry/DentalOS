@@ -42,10 +42,10 @@ export default function CadastroPage() {
               </div>
             </motion.div>
             <CardTitle className="text-2xl font-bold text-white mb-3">Conta criada com sucesso!</CardTitle>
-            <p className="text-white/60 text-sm leading-relaxed mb-6">
-              Enviámos um email de confirmação para <strong className="text-white/80">{state.email || "o seu email"}</strong>.
-              Clique no link para ativar a sua conta e fazer login.
-            </p>
+             <p className="text-white/60 text-sm leading-relaxed mb-6">
+               Enviámos um email de confirmação para <strong className="text-white/80">{(state as { success: boolean; error: string; email?: string })?.email || "o seu email"}</strong>.
+               Clique no link para ativar a sua conta e fazer login.
+             </p>
             <div className="flex items-center justify-center gap-2 text-xs text-white/30 mb-8">
               <Mail className="h-3.5 w-3.5" />
               Se não encontrar, verifique a caixa de spam

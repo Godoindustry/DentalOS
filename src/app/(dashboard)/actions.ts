@@ -301,7 +301,7 @@ export async function criarAgendamento(_prevState: { error?: string; success?: b
   const inicio = new Date(`${data}T${hora}:00`)
   const fim = new Date(inicio.getTime() + duracao * 60 * 1000)
 
-  const { error } = await supabase.from("agendamentos").insert({
+  const { data: inserted, error } = await supabase.from("agendamentos").insert({
     clinica_id: clinicaId,
     paciente_id: pacienteId,
     profissional_id: profissionalId,
@@ -309,47 +309,65 @@ export async function criarAgendamento(_prevState: { error?: string; success?: b
     data_hora_fim: fim.toISOString(),
     status: "agendado",
     canal_origem: "painel",
-  })
+  }).select("id").single()
 
   if (error) return { error: error.message }
 
-  // [Z-API] Enviar WhatsApp automaticamente
   try {
-    const [{ data: paciente }, { data: botConfig }, { data: profissional }] = await Promise.all([
-      supabase.from("pacientes").select("nome, telefone_whatsapp").eq("id", pacienteId).single(),
-      supabase.from("configuracoes_bot").select("mensagem_boas_vindas, ativo, google_calendar_id, google_refresh_token").eq("clinica_id", clinicaId).single(),
-      supabase.from("profissionais").select("nome, google_calendar_id").eq("id", profissionalId).single(),
-    ]);
-
-    const calendarId = profissional?.google_calendar_id || botConfig?.google_calendar_id
-
-    if (botConfig?.ativo && paciente?.telefone_whatsapp) {
-      const msgData = `${inicio.toLocaleDateString("pt-BR")} às ${inicio.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
-      let texto = botConfig.mensagem_boas_vindas || "Olá {nome}, sua consulta está confirmada para {data} com o Dr(a). {profissional}!";
-      texto = texto.replace("{nome}", paciente.nome).replace("{data}", msgData).replace("{profissional}", profissional?.nome || "");
-      
-      const { sendWhatsAppMessage } = await import("@/lib/zapi");
-      await sendWhatsAppMessage(paciente.telefone_whatsapp, texto);
-    }
-
-    // [Google Calendar] Criar evento (calendário do profissional, com fallback para o da clínica)
-    if (calendarId && botConfig?.google_refresh_token) {
-      const { createGoogleCalendarEvent } = await import("@/lib/gcal");
-      await createGoogleCalendarEvent({
-        clinicaId,
-        calendarId,
-        summary: `Consulta: ${paciente?.nome}`,
-        description: `Consulta com Dr(a). ${profissional?.nome}\nGerado automaticamente pelo DentalOS.`,
-        startTime: inicio,
-        endTime: fim,
-      });
-    }
+    await enviarMensagemAgendamento(inserted.id)
   } catch (err) {
-    console.error("Erro ao integrar Z-API/GCal:", err);
+    console.error("Erro ao integrar Z-API/GCal:", err)
   }
 
   revalidatePath("/agendamentos")
   redirect("/agendamentos")
+}
+
+export async function enviarMensagemAgendamento(agendamentoId: string) {
+  const supabase = await createClient()
+  const clinicaId = await getClinicaId(supabase)
+  if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
+
+  const { data: agendamento } = await supabase
+    .from("agendamentos")
+    .select("*, pacientes (nome, telefone_whatsapp), profissionais (nome, google_calendar_id)")
+    .eq("id", agendamentoId)
+    .single()
+
+  if (!agendamento) return { error: "Agendamento não encontrado" }
+
+  const { data: botConfig } = await supabase
+    .from("configuracoes_bot")
+    .select("mensagem_boas_vindas, ativo, google_calendar_id, google_refresh_token")
+    .eq("clinica_id", clinicaId)
+    .single()
+
+  const inicio = new Date(agendamento.data_hora_inicio)
+  const fim = new Date(agendamento.data_hora_fim)
+  const calendarId = agendamento.profissionais?.google_calendar_id || botConfig?.google_calendar_id
+
+  if (botConfig?.ativo && agendamento.pacientes?.telefone_whatsapp) {
+    const msgData = `${inicio.toLocaleDateString("pt-BR")} às ${inicio.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
+    let texto = botConfig.mensagem_boas_vindas || "Olá {nome}, sua consulta está confirmada para {data} com o Dr(a). {profissional}!";
+    texto = texto.replace("{nome}", agendamento.pacientes.nome).replace("{data}", msgData).replace("{profissional}", agendamento.profissionais?.nome || "");
+    
+    const { sendWhatsAppMessage } = await import("@/lib/zapi");
+    await sendWhatsAppMessage(agendamento.pacientes.telefone_whatsapp, texto);
+  }
+
+  if (calendarId && botConfig?.google_refresh_token) {
+    const { createGoogleCalendarEvent } = await import("@/lib/gcal");
+    await createGoogleCalendarEvent({
+      clinicaId,
+      calendarId,
+      summary: `Consulta: ${agendamento.pacientes?.nome}`,
+      description: `Consulta com Dr(a). ${agendamento.profissionais?.nome}\nGerado automaticamente pelo DentalOS.`,
+      startTime: inicio,
+      endTime: fim,
+    });
+  }
+
+  return { success: true }
 }
 
 export async function salvarClinica(_prevState: { error?: string; success?: boolean } | null, formData: FormData) {
@@ -556,11 +574,23 @@ export async function atualizarStatusPotencial(
   formData: FormData
 ) {
   const supabase = await createClient()
+  const clinicaId = await getClinicaId(supabase)
+  if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
 
   const id = formData.get("id") as string
   const status = formData.get("status") as string
 
   if (!id || !status) return { error: "ID e status são obrigatórios" }
+
+  const { data: potencial } = await supabase
+    .from("pacientes_potenciais")
+    .select("clinica_id")
+    .eq("id", id)
+    .maybeSingle()
+
+  if (!potencial || potencial.clinica_id !== clinicaId) {
+    return { error: "Lead não encontrado ou não pertence a esta clínica" }
+  }
 
   const { error } = await supabase
     .from("pacientes_potenciais")
@@ -648,6 +678,18 @@ export async function criarCobrancaCadeira(_prevState: { error?: string; success
 
 export async function marcarCobrancaPaga(id: string) {
   const supabase = await createClient()
+  const clinicaId = await getClinicaId(supabase)
+  if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
+
+  const { data: cobranca } = await supabase
+    .from("financeiro_cadeiras")
+    .select("clinica_id")
+    .eq("id", id)
+    .maybeSingle()
+
+  if (!cobranca || cobranca.clinica_id !== clinicaId) {
+    return { error: "Cobrança não encontrada ou não pertence a esta clínica" }
+  }
 
   const { error } = await supabase
     .from("financeiro_cadeiras")
@@ -680,10 +722,14 @@ export async function enviarRelatorioMensal() {
   const totalLiquido = (faturamentos ?? []).reduce((soma, f) => soma + Number(f.lucro_liquido_clinica), 0)
 
   const formatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
+  const clinicName = (clinica?.nome_fantasia || "Sua Clínica").replace(/[&<>"']/g, (c: string) => {
+    const map: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }
+    return map[c] || c
+  })
   const html = `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
       <h2 style="color: #0F766E;">Relatório Financeiro Mensal</h2>
-      <p><strong>Clínica:</strong> ${clinica?.nome_fantasia || "Sua Clínica"}</p>
+      <p><strong>Clínica:</strong> ${clinicName}</p>
       <p>Confira o resumo financeiro parcial deste mês:</p>
       <div style="background: #F1F5F9; padding: 15px; border-radius: 8px; margin: 20px 0;">
         <p style="margin: 5px 0;"><strong>Faturamento Bruto:</strong> ${formatter.format(totalBruto)}</p>
@@ -694,11 +740,11 @@ export async function enviarRelatorioMensal() {
   `
 
   const { sendEmail } = await import("@/lib/resend")
-  const emailTo = "diogo.godoi.industry@gmail.com" // Forçado conforme documentação
-  
+  const emailTo = process.env.FINANCEIRO_EMAIL || "diogo.godoi.industry@gmail.com"
+
   const result = await sendEmail({
     to: emailTo,
-    subject: `Relatório Financeiro DentalOS - ${clinica?.nome_fantasia || ""}`,
+    subject: `Relatório Financeiro DentalOS - ${clinica?.nome_fantasia || "Clínica"}`,
     html,
   })
 

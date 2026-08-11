@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { rateLimit, getClientIp } from "@/lib/rate-limit"
 
 interface EnderecoResult {
   cep: string
@@ -8,26 +9,37 @@ interface EnderecoResult {
   uf: string
 }
 
-/**
- * Consulta pública de CEP (sem credenciais): tenta BrasilAPI primeiro
- * (mais completa) e cai para ViaCEP se a primeira falhar/não achar.
- */
+async function fetchWithTimeout(url: string, timeoutMs = 5000): Promise<Response> {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    const response = await fetch(url, { signal: controller.signal })
+    return response
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ cep: string }> }
 ) {
+  const clientIp = getClientIp(_request)
+
+  if (!rateLimit(`cep:${clientIp}`, 30, 60_000)) {
+    return NextResponse.json({ error: "Muitas requisições. Tente novamente em 1 minuto." }, { status: 429 })
+  }
+
   const { cep: rawCep } = await params
   const cep = rawCep.replace(/\D/g, "")
 
-  if (cep.length !== 8) {
+  if (!/^\d{8}$/.test(cep)) {
     return NextResponse.json({ error: "CEP inválido" }, { status: 400 })
   }
 
   try {
-    const brasilApiRes = await fetch(`https://brasilapi.com.br/api/cep/v1/${cep}`, {
-      next: { revalidate: 60 * 60 * 24 },
-    })
-    if (brasilApiRes.ok) {
+    const brasilApiRes = await fetchWithTimeout(`https://brasilapi.com.br/api/cep/v1/${cep}`)
+    if (brasilApiRes.ok && brasilApiRes.headers.get("content-type")?.includes("application/json")) {
       const data = await brasilApiRes.json()
       const resultado: EnderecoResult = {
         cep,
@@ -43,11 +55,13 @@ export async function GET(
   }
 
   try {
-    const viaCepRes = await fetch(`https://viacep.com.br/ws/${cep}/json/`, {
-      next: { revalidate: 60 * 60 * 24 },
-    })
+    const viaCepRes = await fetchWithTimeout(`https://viacep.com.br/ws/${cep}/json/`)
+    const contentType = viaCepRes.headers.get("content-type")
+    if (!viaCepRes.ok || !contentType?.includes("application/json")) {
+      return NextResponse.json({ error: "CEP não encontrado" }, { status: 404 })
+    }
     const data = await viaCepRes.json()
-    if (!viaCepRes.ok || data.erro) {
+    if (data.erro) {
       return NextResponse.json({ error: "CEP não encontrado" }, { status: 404 })
     }
     const resultado: EnderecoResult = {
