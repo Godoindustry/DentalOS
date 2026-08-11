@@ -1,6 +1,13 @@
 const ZAPI_INSTANCE_ID = process.env.ZAPI_INSTANCE_ID;
 const ZAPI_TOKEN = process.env.ZAPI_TOKEN;
-const ZAPI_URL = `https://api.z-api.io/instances/${ZAPI_INSTANCE_ID}/token/${ZAPI_TOKEN}/send-text`;
+const ZAPI_CLIENT_TOKEN = process.env.ZAPI_CLIENT_TOKEN;
+const ZAPI_BASE_URL = `https://api.z-api.io/instances/${ZAPI_INSTANCE_ID}/token/${ZAPI_TOKEN}`;
+
+function zapiHeaders() {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (ZAPI_CLIENT_TOKEN) headers['Client-Token'] = ZAPI_CLIENT_TOKEN;
+  return headers;
+}
 
 export async function sendWhatsAppMessage(phone: string, message: string) {
   if (!ZAPI_INSTANCE_ID || !ZAPI_TOKEN) {
@@ -15,11 +22,9 @@ export async function sendWhatsAppMessage(phone: string, message: string) {
   }
 
   try {
-    const response = await fetch(ZAPI_URL, {
+    const response = await fetch(`${ZAPI_BASE_URL}/send-text`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: zapiHeaders(),
       body: JSON.stringify({
         phone: formattedPhone,
         message,
@@ -38,4 +43,37 @@ export async function sendWhatsAppMessage(phone: string, message: string) {
     console.error("Exception calling Z-API:", error);
     return { error };
   }
+}
+
+/** Aponta o webhook de mensagens recebidas da Z-API para a URL informada (ex: webhook do n8n). */
+export async function setReceivedWebhook(webhookUrl: string) {
+  if (!ZAPI_INSTANCE_ID || !ZAPI_TOKEN) {
+    return { error: "Z-API credentials missing" };
+  }
+
+  try {
+    const response = await fetch(`${ZAPI_BASE_URL}/update-webhook-received`, {
+      method: 'PUT',
+      headers: zapiHeaders(),
+      body: JSON.stringify({ value: webhookUrl }),
+    });
+
+    const text = await response.text();
+    if (!response.ok) {
+      console.error("Z-API webhook config error:", text);
+      return { error: text };
+    }
+    return { data: text };
+  } catch (error) {
+    console.error("Exception configuring Z-API webhook:", error);
+    return { error };
+  }
+}
+
+export async function getInstanceStatus() {
+  if (!ZAPI_INSTANCE_ID || !ZAPI_TOKEN) {
+    return { error: "Z-API credentials missing" };
+  }
+  const response = await fetch(`${ZAPI_BASE_URL}/status`, { headers: zapiHeaders() });
+  return { data: await response.json() };
 }
