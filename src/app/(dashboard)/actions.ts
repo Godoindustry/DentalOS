@@ -55,14 +55,19 @@ export async function editarPaciente(_prevState: { error?: string; success?: boo
   redirect("/pacientes")
 }
 
-async function getClinicaId(supabase: Awaited<ReturnType<typeof createClient>>) {
+export async function getClinicaId(supabase: Awaited<ReturnType<typeof createClient>>) {
   const { data: user } = await supabase.auth.getUser()
-  let clinicaId = user.user?.user_metadata?.clinica_id
-  if (!clinicaId) return null
+  if (!user.user) return null
+  let clinicaId = user.user.user_metadata?.clinica_id
 
   const admin = createAdminClient()
-  const { data: clinica } = await admin.from("clinicas").select("id").eq("id", clinicaId).maybeSingle()
+  const clinica = clinicaId
+    ? (await admin.from("clinicas").select("id").eq("id", clinicaId).maybeSingle()).data
+    : null
+
   if (!clinica) {
+    // Cobre dois casos: usuário nunca teve clinica_id, ou tinha um clinica_id
+    // apontando para uma clínica que não existe mais (ex: reset de banco).
     const { data: newClinica } = await admin
       .from("clinicas")
       .insert({ nome_fantasia: "Minha Clínica", plano_assinatura: "basic" })
@@ -70,14 +75,14 @@ async function getClinicaId(supabase: Awaited<ReturnType<typeof createClient>>) 
       .single()
     if (newClinica) {
       clinicaId = newClinica.id
-      await admin.auth.admin.updateUserById(user.user!.id, {
-        user_metadata: { ...user.user!.user_metadata, clinica_id: clinicaId },
+      await admin.auth.admin.updateUserById(user.user.id, {
+        user_metadata: { ...user.user.user_metadata, clinica_id: clinicaId },
       })
       await supabase.auth.refreshSession()
     }
   }
 
-  return clinicaId
+  return clinicaId ?? null
 }
 
 export async function criarPaciente(_prevState: { error?: string; success?: boolean } | null, formData: FormData) {
@@ -160,8 +165,7 @@ export async function editarProfissional(_prevState: { error?: string; success?:
 
 export async function criarProfissional(_prevState: { error?: string; success?: boolean } | null, formData: FormData) {
   const supabase = await createClient()
-  const { data: user } = await supabase.auth.getUser()
-  const clinicaId = user.user?.user_metadata?.clinica_id
+  const clinicaId = await getClinicaId(supabase)
   if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
 
   const parsed = profissionalSchema.safeParse({
@@ -247,8 +251,7 @@ export async function editarProcedimento(_prevState: { error?: string; success?:
 
 export async function criarProcedimento(_prevState: { error?: string; success?: boolean } | null, formData: FormData) {
   const supabase = await createClient()
-  const { data: user } = await supabase.auth.getUser()
-  const clinicaId = user.user?.user_metadata?.clinica_id
+  const clinicaId = await getClinicaId(supabase)
   if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
 
   const parsed = procedimentoSchema.safeParse({
@@ -282,8 +285,7 @@ export async function criarProcedimento(_prevState: { error?: string; success?: 
 
 export async function criarAgendamento(_prevState: { error?: string; success?: boolean } | null, formData: FormData) {
   const supabase = await createClient()
-  const { data: user } = await supabase.auth.getUser()
-  const clinicaId = user.user?.user_metadata?.clinica_id
+  const clinicaId = await getClinicaId(supabase)
   if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
 
   const pacienteId = formData.get("paciente_id") as string
@@ -316,8 +318,10 @@ export async function criarAgendamento(_prevState: { error?: string; success?: b
     const [{ data: paciente }, { data: botConfig }, { data: profissional }] = await Promise.all([
       supabase.from("pacientes").select("nome, telefone_whatsapp").eq("id", pacienteId).single(),
       supabase.from("configuracoes_bot").select("mensagem_boas_vindas, ativo, google_calendar_id, google_refresh_token").eq("clinica_id", clinicaId).single(),
-      supabase.from("profissionais").select("nome").eq("id", profissionalId).single(),
+      supabase.from("profissionais").select("nome, google_calendar_id").eq("id", profissionalId).single(),
     ]);
+
+    const calendarId = profissional?.google_calendar_id || botConfig?.google_calendar_id
 
     if (botConfig?.ativo && paciente?.telefone_whatsapp) {
       const msgData = `${inicio.toLocaleDateString("pt-BR")} às ${inicio.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
@@ -328,12 +332,12 @@ export async function criarAgendamento(_prevState: { error?: string; success?: b
       await sendWhatsAppMessage(paciente.telefone_whatsapp, texto);
     }
 
-    // [Google Calendar] Criar evento
-    if (botConfig?.google_calendar_id && botConfig?.google_refresh_token) {
+    // [Google Calendar] Criar evento (calendário do profissional, com fallback para o da clínica)
+    if (calendarId && botConfig?.google_refresh_token) {
       const { createGoogleCalendarEvent } = await import("@/lib/gcal");
       await createGoogleCalendarEvent({
         clinicaId,
-        calendarId: botConfig.google_calendar_id,
+        calendarId,
         summary: `Consulta: ${paciente?.nome}`,
         description: `Consulta com Dr(a). ${profissional?.nome}\nGerado automaticamente pelo DentalOS.`,
         startTime: inicio,
@@ -351,8 +355,7 @@ export async function criarAgendamento(_prevState: { error?: string; success?: b
 export async function salvarClinica(_prevState: { error?: string; success?: boolean } | null, formData: FormData) {
   const supabase = await createClient()
 
-  const { data: user } = await supabase.auth.getUser()
-  const clinicaId = user.user?.user_metadata?.clinica_id
+  const clinicaId = await getClinicaId(supabase)
   if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
 
   const { error } = await supabase.from("clinicas").upsert({
@@ -411,8 +414,7 @@ export async function salvarPerfil(_prevState: { error?: string; success?: boole
 
 export async function salvarConfiguracaoBot(_prevState: { error?: string; success?: boolean } | null, formData: FormData) {
   const supabase = await createClient()
-  const { data: user } = await supabase.auth.getUser()
-  const clinicaId = user.user?.user_metadata?.clinica_id
+  const clinicaId = await getClinicaId(supabase)
   if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
 
   const { error } = await supabase.from("configuracoes_bot").upsert({
@@ -448,8 +450,7 @@ export interface OdontogramaInput {
 export async function salvarAnamnese(_prevState: { error?: string; success?: boolean } | null, formData: FormData) {
   const supabase = await createClient()
 
-  const { data: user } = await supabase.auth.getUser()
-  const clinicaId = user.user?.user_metadata?.clinica_id
+  const clinicaId = await getClinicaId(supabase)
   if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
 
   const pacienteId = formData.get("paciente_id") as string
@@ -498,8 +499,7 @@ export async function converterPacientePotencial(
   formData: FormData
 ) {
   const supabase = await createClient()
-  const { data: user } = await supabase.auth.getUser()
-  const clinicaId = user.user?.user_metadata?.clinica_id
+  const clinicaId = await getClinicaId(supabase)
   if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
 
   const potencialId = formData.get("potencial_id") as string
@@ -576,8 +576,7 @@ export async function atualizarStatusPotencial(
 export async function salvarOdontograma(dados: OdontogramaInput) {
   const supabase = await createClient()
 
-  const { data: user } = await supabase.auth.getUser()
-  const clinicaId = user.user?.user_metadata?.clinica_id
+  const clinicaId = await getClinicaId(supabase)
   if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
 
   const { error } = await supabase.from("odontograma").upsert(
@@ -597,8 +596,7 @@ export async function salvarOdontograma(dados: OdontogramaInput) {
 
 export async function criarCobrancaCadeira(_prevState: { error?: string; success?: boolean } | null, formData: FormData) {
   const supabase = await createClient()
-  const { data: user } = await supabase.auth.getUser()
-  const clinicaId = user.user?.user_metadata?.clinica_id
+  const clinicaId = await getClinicaId(supabase)
   if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
 
   const profissionalId = formData.get("profissional_id") as string
@@ -664,8 +662,7 @@ export async function marcarCobrancaPaga(id: string) {
 
 export async function enviarRelatorioMensal() {
   const supabase = await createClient()
-  const { data: user } = await supabase.auth.getUser()
-  const clinicaId = user.user?.user_metadata?.clinica_id
+  const clinicaId = await getClinicaId(supabase)
   if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
 
   const { data: clinica } = await supabase.from("clinicas").select("nome_fantasia").eq("id", clinicaId).single()

@@ -19,6 +19,7 @@ export interface Profissional {
   especialidade_principal: string | null
   porcentagem_comissao: number
   role: "titular" | "sublocatario"
+  google_calendar_id: string | null
   ativo: boolean
   created_at: string
 }
@@ -169,6 +170,8 @@ export interface ConfiguracaoBot {
   telefone: string | null
   whatsapp: string | null
   google_calendar_id: string | null
+  google_refresh_token: string | null
+  google_access_token: string | null
   mensagem_boas_vindas: string | null
   mensagem_urgencia: string | null
   transferencia_humano: string | null

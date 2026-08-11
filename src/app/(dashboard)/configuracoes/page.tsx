@@ -223,8 +223,8 @@ export default function ConfiguracoesPage() {
             <CardHeader>
               <CardTitle>Assistente Virtual (Bot)</CardTitle>
               <CardDescription>
-                Configurações usadas pela automação de WhatsApp via n8n. As mensagens são enviadas
-                por um fluxo externo (n8n + Z-API) que lê estes dados diretamente do banco.
+                Configurações usadas para confirmar agendamentos por WhatsApp (Z-API) e sincronizar
+                com o Google Calendar automaticamente.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -267,8 +267,30 @@ export default function ConfiguracoesPage() {
                         <Label htmlFor="google_calendar_id" className="text-white/70">Google Calendar ID</Label>
                         <Input id="google_calendar_id" name="google_calendar_id" defaultValue={configBot?.google_calendar_id ?? ""} placeholder="ex: seuemail@group.calendar.google.com" />
                         <p className="text-xs text-white/40">
-                          ID da agenda Google que receberá os agendamentos automáticos criados pelo bot. A sincronização em si é feita pelo fluxo n8n.
+                          ID da agenda Google que receberá os agendamentos automáticos criados no sistema.
                         </p>
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-white">Conexão com Google Calendar</p>
+                          <p className="text-xs text-white/40">
+                            {configBot?.google_refresh_token
+                              ? "Conectado — novos agendamentos são criados automaticamente na agenda acima."
+                              : "Não conectado. Sem isso, os agendamentos não são sincronizados com o Google Calendar."}
+                          </p>
+                        </div>
+                        {configBot?.google_refresh_token ? (
+                          <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-400">
+                            <Check className="h-3.5 w-3.5" /> Conectado
+                          </span>
+                        ) : (
+                          <Button type="button" variant="outline" size="sm" asChild>
+                            <a href="/api/auth/google">Conectar Google Calendar</a>
+                          </Button>
+                        )}
                       </div>
                     </div>
                     <div className="space-y-2">

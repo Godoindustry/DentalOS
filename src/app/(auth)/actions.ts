@@ -21,6 +21,8 @@ export async function loginAction(_prevState: { error: string } | null, formData
 
   const admin = createAdminClient()
 
+  let precisaAtualizarSessao = false
+
   if (clinicaId) {
     const { data: clinica } = await admin
       .from("clinicas")
@@ -37,6 +39,7 @@ export async function loginAction(_prevState: { error: string } | null, formData
         await admin.auth.admin.updateUserById(user!.id, {
           user_metadata: { ...user!.user_metadata, clinica_id: newClinica.id },
         })
+        precisaAtualizarSessao = true
       }
     }
   } else {
@@ -49,7 +52,15 @@ export async function loginAction(_prevState: { error: string } | null, formData
       await admin.auth.admin.updateUserById(user!.id, {
         user_metadata: { ...user!.user_metadata, clinica_id: clinica.id },
       })
+      precisaAtualizarSessao = true
     }
+  }
+
+  // O token de sessão já emitido não reflete o clinica_id recém-atribuído
+  // via admin API; sem isso, as políticas de RLS (que leem o JWT) não
+  // encontram a clínica e as consultas voltam vazias em silêncio.
+  if (precisaAtualizarSessao) {
+    await supabase.auth.refreshSession()
   }
 
   redirect("/dashboard")
