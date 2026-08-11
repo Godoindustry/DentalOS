@@ -6,6 +6,7 @@ import { Stethoscope } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { DentalPasswordInput } from "@/components/ui/dental-password-input"
 import { Label } from "@/components/ui/label"
 import {
   Card,
@@ -70,7 +71,7 @@ export default function LoginPage() {
                     Esqueceu a senha?
                   </Link>
                 </div>
-                <Input id="password" name="password" type="password" placeholder="••••••••" autoComplete="current-password" required />
+                <DentalPasswordInput id="password" name="password" placeholder="••••••••" autoComplete="current-password" required />
               </div>
               <Button className="w-full h-11" type="submit" disabled={pending}>
                 {pending ? "Entrando..." : "Entrar"}

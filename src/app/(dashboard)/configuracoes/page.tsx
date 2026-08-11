@@ -16,24 +16,28 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Building2, Bell, Shield, Palette, Check, User } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
-import { salvarClinica, salvarPerfil } from "../actions"
+import { salvarClinica, salvarPerfil, salvarConfiguracaoBot } from "../actions"
 
 const supabase = createClient()
 
 export default function ConfiguracoesPage() {
   const [clinica, setClinica] = useState<any>(null)
   const [perfil, setPerfil] = useState<any>(null)
+  const [configBot, setConfigBot] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [state, formAction, pending] = useActionState(salvarClinica, null)
   const [perfilState, perfilAction, perfilPending] = useActionState(salvarPerfil, null)
+  const [botState, botAction, botPending] = useActionState(salvarConfiguracaoBot, null)
 
   useEffect(() => {
     const load = async () => {
-      const [{ data: clinicaData }, { data: auth }] = await Promise.all([
+      const [{ data: clinicaData }, { data: auth }, { data: botData }] = await Promise.all([
         supabase.from("clinicas").select("*").single(),
         supabase.auth.getUser(),
+        supabase.from("configuracoes_bot").select("*").maybeSingle(),
       ])
       if (clinicaData) setClinica(clinicaData)
+      if (botData) setConfigBot(botData)
 
       const user = auth.user
       if (user) {
@@ -217,15 +221,102 @@ export default function ConfiguracoesPage() {
         <TabsContent value="notificacoes">
           <Card>
             <CardHeader>
-              <CardTitle>Notificações</CardTitle>
+              <CardTitle>Assistente Virtual (Bot)</CardTitle>
               <CardDescription>
-                Configure os alertas e notificações do sistema
+                Configurações usadas pela automação de WhatsApp via n8n. As mensagens são enviadas
+                por um fluxo externo (n8n + Z-API) que lê estes dados diretamente do banco.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-white/50">
-                Em breve: integração com WhatsApp e e-mail transacional.
-              </p>
+              <form action={botAction} className="space-y-4">
+                {loading ? (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-10" />)}
+                  </div>
+                ) : (
+                  <>
+                    {botState?.error && (
+                      <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                        {botState.error}
+                      </div>
+                    )}
+                    {botState?.success && (
+                      <div className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400">
+                        <Check className="h-4 w-4" />
+                        Configurações do bot salvas com sucesso
+                      </div>
+                    )}
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="nome_clinica" className="text-white/70">Nome da clínica (usado pelo bot)</Label>
+                        <Input id="nome_clinica" name="nome_clinica" defaultValue={configBot?.nome_clinica ?? ""} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="telefone" className="text-white/70">Telefone da clínica</Label>
+                        <Input id="telefone" name="telefone" defaultValue={configBot?.telefone ?? ""} placeholder="(11) 0000-0000" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="whatsapp" className="text-white/70">Número WhatsApp (Z-API)</Label>
+                        <Input id="whatsapp" name="whatsapp" defaultValue={configBot?.whatsapp ?? ""} placeholder="(11) 90000-0000" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="horario_funcionamento" className="text-white/70">Horário de funcionamento</Label>
+                        <Input id="horario_funcionamento" name="horario_funcionamento" defaultValue={configBot?.horario_funcionamento ?? ""} placeholder="seg a sex 08:00-18:00" />
+                      </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="google_calendar_id" className="text-white/70">Google Calendar ID</Label>
+                        <Input id="google_calendar_id" name="google_calendar_id" defaultValue={configBot?.google_calendar_id ?? ""} placeholder="ex: seuemail@group.calendar.google.com" />
+                        <p className="text-xs text-white/40">
+                          ID da agenda Google que receberá os agendamentos automáticos criados pelo bot. A sincronização em si é feita pelo fluxo n8n.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="mensagem_boas_vindas" className="text-white/70">Mensagem de boas-vindas</Label>
+                      <textarea
+                        id="mensagem_boas_vindas"
+                        name="mensagem_boas_vindas"
+                        defaultValue={configBot?.mensagem_boas_vindas ?? ""}
+                        rows={2}
+                        className="flex w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="mensagem_urgencia" className="text-white/70">Mensagem para casos de urgência</Label>
+                      <textarea
+                        id="mensagem_urgencia"
+                        name="mensagem_urgencia"
+                        defaultValue={configBot?.mensagem_urgencia ?? ""}
+                        rows={2}
+                        className="flex w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="transferencia_humano" className="text-white/70">Mensagem de transferência para atendimento humano</Label>
+                      <textarea
+                        id="transferencia_humano"
+                        name="transferencia_humano"
+                        defaultValue={configBot?.transferencia_humano ?? ""}
+                        rows={2}
+                        className="flex w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
+                      />
+                    </div>
+                    <label className="flex items-center gap-2 text-sm text-white/70">
+                      <input
+                        type="checkbox"
+                        name="ativo"
+                        value="true"
+                        defaultChecked={configBot?.ativo ?? true}
+                        className="h-4 w-4 rounded border-white/20 bg-white/5"
+                      />
+                      Bot ativo
+                    </label>
+                    <Button type="submit" disabled={botPending}>
+                      {botPending ? "Salvando..." : "Salvar Configurações do Bot"}
+                    </Button>
+                  </>
+                )}
+              </form>
             </CardContent>
           </Card>
         </TabsContent>

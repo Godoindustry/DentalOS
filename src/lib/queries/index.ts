@@ -90,6 +90,41 @@ export function usePacientesPotenciais() {
   return useSupabaseQuery<PacientePotencial>("pacientes_potenciais", { order: "ultima_interacao", ascending: false })
 }
 
+export interface CobrancaCadeira {
+  id: string
+  profissional_id: string
+  tipo_cobranca: "fixo" | "percentual"
+  valor_fixo_mensal: number | null
+  percentual_faturamento: number | null
+  competencia: string
+  faturamento_base: number
+  valor_calculado: number
+  status_pagamento: "pendente" | "pago" | "atrasado"
+  data_pagamento: string | null
+  profissionais: { nome: string } | null
+}
+
+export function useFinanceiroCadeiras() {
+  const [data, setData] = useState<CobrancaCadeira[]>([])
+  const [loading, setLoading] = useState(true)
+  const supabase = createClient()
+
+  const fetch = useCallback(async () => {
+    setLoading(true)
+    const { data: result, error } = await supabase
+      .from("financeiro_cadeiras")
+      .select("*, profissionais(nome)")
+      .order("competencia", { ascending: false })
+    if (error) console.error(error)
+    else setData(result as unknown as CobrancaCadeira[])
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { fetch() }, [fetch])
+
+  return { data, loading, refetch: fetch }
+}
+
 export function usePaciente(id: string) {
   const [data, setData] = useState<Paciente | null>(null)
   const [loading, setLoading] = useState(true)

@@ -63,3 +63,4 @@ export {
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs"
 export { Toaster } from "./toaster"
 export { toast, useToast } from "./use-toast"
+export { DentalPasswordInput } from "./dental-password-input"

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useTransition } from "react"
 import { motion } from "framer-motion"
 import { PageTransition } from "@/components/ui/page-transition"
 import Link from "next/link"
@@ -25,6 +25,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { DollarSign, Search, Download, TrendingUp, TrendingDown, ArrowRight } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { formatCurrency } from "@/lib/queries"
+import { enviarRelatorioMensal } from "../actions"
 
 const supabase = createClient()
 
@@ -52,6 +53,18 @@ export default function FaturamentoPage() {
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
+  const [isPending, startTransition] = useTransition()
+
+  const handleExportar = () => {
+    startTransition(async () => {
+      const res = await enviarRelatorioMensal()
+      if (res.error) {
+        alert(res.error)
+      } else {
+        alert("Relatório enviado com sucesso para o seu e-mail!")
+      }
+    })
+  }
 
   useEffect(() => {
     supabase
@@ -91,9 +104,9 @@ export default function FaturamentoPage() {
           <h1 className="text-2xl font-bold tracking-tight text-white">Faturamento</h1>
           <p className="text-sm text-white/50">Controle financeiro e análise de lucratividade</p>
         </div>
-        <Button variant="outline" disabled>
+        <Button variant="outline" onClick={handleExportar} disabled={isPending}>
           <Download className="mr-2 h-4 w-4" />
-          Exportar
+          {isPending ? "Enviando..." : "Exportar por E-mail"}
         </Button>
       </div>
 

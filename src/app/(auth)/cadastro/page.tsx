@@ -6,6 +6,7 @@ import { Stethoscope, Check, Mail } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { DentalPasswordInput } from "@/components/ui/dental-password-input"
 import { Label } from "@/components/ui/label"
 import {
   Card,
@@ -15,6 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { signupAction } from "../actions"
+import { UFS_BRASIL } from "@/lib/validations"
 
 export default function CadastroPage() {
   const [state, formAction, pending] = useActionState(signupAction, null)
@@ -107,7 +109,27 @@ export default function CadastroPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-white/70">Senha</Label>
-                <Input id="password" name="password" type="password" placeholder="Mínimo 6 caracteres" autoComplete="new-password" required minLength={6} />
+                <DentalPasswordInput id="password" name="password" placeholder="Mínimo 6 caracteres" autoComplete="new-password" required minLength={6} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="cro" className="text-white/70">CRO</Label>
+                  <Input id="cro" name="cro" placeholder="00000" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="uf_cro" className="text-white/70">UF do CRO</Label>
+                  <select
+                    id="uf_cro"
+                    name="uf_cro"
+                    required
+                    className="flex h-10 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
+                  >
+                    <option value="">UF</option>
+                    {UFS_BRASIL.map((uf) => (
+                      <option key={uf} value={uf}>{uf}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <Button className="w-full h-11" type="submit" disabled={pending}>
                 {pending ? "Criando conta..." : "Criar Conta Demo"}

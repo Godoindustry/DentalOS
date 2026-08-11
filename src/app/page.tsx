@@ -81,7 +81,7 @@ function FloatingOrb({ className = "", size = 300, color = "rgba(59,130,246,0.08
 
 function Counter({ end, suffix = "", duration = 2 }: { end: number; suffix?: string; duration?: number }) {
   const [count, setCount] = useState(0)
-  const ref = useRef<HTMLDivElement>(null)
+  const ref = useRef<HTMLSpanElement>(null)
   const inView = useInView(ref, { once: true })
 
   useEffect(() => {
@@ -96,7 +96,7 @@ function Counter({ end, suffix = "", duration = 2 }: { end: number; suffix?: str
     return () => clearInterval(timer)
   }, [inView, end, duration])
 
-  return <div ref={ref}>{count}{suffix}</div>
+  return <span ref={ref}>{count}{suffix}</span>
 }
 
 const FEATURES = [

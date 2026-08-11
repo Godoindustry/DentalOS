@@ -1,5 +1,11 @@
 import { z } from "zod"
 
+export const UFS_BRASIL = [
+  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO",
+  "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI",
+  "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO",
+] as const
+
 export const pacienteSchema = z.object({
   nome: z.string().trim().min(2, "Nome deve ter ao menos 2 caracteres"),
   cpf: z.string().trim().optional().nullable(),
@@ -19,11 +25,17 @@ export const pacienteSchema = z.object({
 
 export const profissionalSchema = z.object({
   nome: z.string().trim().min(2, "Nome deve ter ao menos 2 caracteres"),
-  cro: z.string().trim().min(1, "CRO é obrigatório"),
-  uf_cro: z.string().trim().length(2, "UF do CRO deve ter 2 letras"),
+  cro: z.string().trim().regex(/^\d{3,6}$/, "CRO deve conter de 3 a 6 dígitos numéricos"),
+  uf_cro: z.enum(UFS_BRASIL, { message: "UF do CRO inválida" }),
   especialidade: z.string().trim().optional().nullable(),
   comissao: z.coerce.number().min(0, "Comissão não pode ser negativa").max(100, "Comissão não pode passar de 100%"),
-})
+  role: z.enum(["titular", "sublocatario"]).default("sublocatario"),
+  email: z.string().trim().email("E-mail inválido").optional().nullable().or(z.literal("")),
+  senha: z.string().trim().min(6, "Senha deve ter ao menos 6 caracteres").optional().nullable().or(z.literal("")),
+}).refine(
+  (data) => data.role !== "sublocatario" || !data.email || (data.email && data.senha),
+  { message: "Informe uma senha para criar o login do sublocatário", path: ["senha"] }
+)
 
 export const procedimentoSchema = z.object({
   nome_servico: z.string().trim().min(2, "Nome do serviço deve ter ao menos 2 caracteres"),

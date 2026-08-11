@@ -20,6 +20,7 @@ import {
   ScanLine,
   MessageCircle,
   Bot,
+  Building,
 } from "lucide-react"
 
 const sidebarItems = [
@@ -32,6 +33,7 @@ const sidebarItems = [
   { title: "Agendamentos", href: "/agendamentos", icon: CalendarDays },
   { title: "Odontograma", href: "/odontograma", icon: ScanLine },
   { title: "Faturamento", href: "/faturamento", icon: DollarSign },
+  { title: "Cadeiras/Salas", href: "/financeiro-cadeiras", icon: Building },
   { title: "Anamnese", href: "/anamnese", icon: ClipboardList },
   { title: "Configurações", href: "/configuracoes", icon: Settings },
 ]

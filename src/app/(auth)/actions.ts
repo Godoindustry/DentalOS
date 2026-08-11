@@ -3,6 +3,9 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { UFS_BRASIL } from "@/lib/validations"
+
+const UF_SET = new Set<string>(UFS_BRASIL)
 
 export async function loginAction(_prevState: { error: string } | null, formData: FormData) {
   const supabase = await createClient()
@@ -56,9 +59,13 @@ export async function signupAction(_prevState: { success: boolean; error: string
   const nome = formData.get("nome") as string
   const email = formData.get("email") as string
   const password = formData.get("password") as string
+  const cro = (formData.get("cro") as string || "").trim()
+  const ufCro = (formData.get("uf_cro") as string || "").trim().toUpperCase()
 
-  if (!nome || !email || !password) return { success: false, error: "Preencha todos os campos" }
+  if (!nome || !email || !password || !cro || !ufCro) return { success: false, error: "Preencha todos os campos" }
   if (password.length < 6) return { success: false, error: "A senha deve ter no mínimo 6 caracteres" }
+  if (!/^\d{3,6}$/.test(cro)) return { success: false, error: "CRO deve conter de 3 a 6 dígitos numéricos" }
+  if (!UF_SET.has(ufCro)) return { success: false, error: "UF do CRO inválida" }
 
   const admin = createAdminClient()
 
@@ -79,8 +86,10 @@ export async function signupAction(_prevState: { success: boolean; error: string
     email,
     password,
     email_confirm: true,
-    user_metadata: { nome, clinica_id: clinica.id },
+    user_metadata: { nome, clinica_id: clinica.id, role: "titular" },
   })
+
+  let userId = authData?.user?.id ?? null
 
   // 3. Se admin API falhar, tentar via RPC (diretamente no banco)
   if (signUpError || !authData?.user) {
@@ -96,6 +105,20 @@ export async function signupAction(_prevState: { success: boolean; error: string
       const msg = (rpcResult as { error?: string })?.error || rpcError?.message || signUpError?.message
       return { success: false, error: msg || "Erro ao criar usuário" }
     }
+    userId = (rpcResult as { user_id?: string })?.user_id ?? null
+  }
+
+  // 3.1 Cria o registro de profissional titular vinculado à conta
+  if (userId) {
+    const { error: profError } = await admin.from("profissionais").insert({
+      clinica_id: clinica.id,
+      user_id: userId,
+      nome,
+      cro,
+      uf_cro: ufCro,
+      role: "titular",
+    })
+    if (profError) console.error("[signupAction] profError:", profError)
   }
 
   // 4. Login automático

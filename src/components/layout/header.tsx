@@ -52,7 +52,7 @@ function ThemeToggle() {
 
 export function Header() {
   const [showNotifications, setShowNotifications] = useState(false)
-  const [usuario, setUsuario] = useState({ nome: "Usuario", especialidade: "Profissional" })
+  const [usuario, setUsuario] = useState({ nome: "Usuario", especialidade: "Profissional", role: "titular" })
   const { collapsed, setCollapsed } = useSidebar()
   const router = useRouter()
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -81,13 +81,15 @@ export function Header() {
 
       const { data: profissional } = await supabase
         .from("profissionais")
-        .select("nome, especialidade_principal")
+        .select("nome, especialidade_principal, role")
         .eq("user_id", user.id)
         .maybeSingle()
 
       setUsuario({
         nome: profissional?.nome ?? (user.user_metadata?.nome as string | undefined) ?? user.email ?? "Usuario",
-        especialidade: profissional?.especialidade_principal ?? "Profissional",
+        especialidade: profissional?.especialidade_principal
+          ?? (profissional?.role === "sublocatario" ? "Sublocatário" : "Titular"),
+        role: profissional?.role ?? "titular",
       })
     }
 

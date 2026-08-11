@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useState } from "react"
 import { PageTransition } from "@/components/ui/page-transition"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -21,9 +21,11 @@ import {
 } from "@/components/ui/select"
 import { ArrowLeft } from "lucide-react"
 import { criarProfissional } from "../../actions"
+import { UFS_BRASIL } from "@/lib/validations"
 
 export default function NovoProfissionalPage() {
   const [state, formAction, pending] = useActionState(criarProfissional, null)
+  const [comLogin, setComLogin] = useState(false)
 
   return (
     <PageTransition className="space-y-6">
@@ -85,19 +87,58 @@ export default function NovoProfissionalPage() {
                   required
                 >
                   <option value="">UF</option>
-                  <option value="SP">SP</option>
-                  <option value="RJ">RJ</option>
-                  <option value="MG">MG</option>
-                  <option value="RS">RS</option>
-                  <option value="PR">PR</option>
-                  <option value="BA">BA</option>
+                  {UFS_BRASIL.map((uf) => (
+                    <option key={uf} value={uf}>{uf}</option>
+                  ))}
                 </select>
+                <p className="text-xs text-white/40">Formato validado (dígitos + UF); não consulta o cadastro oficial do CRO em tempo real.</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="comissao" className="text-white/70">Porcentagem de Comissão (%)</Label>
                 <Input id="comissao" name="comissao" type="number" placeholder="40" defaultValue="40" />
               </div>
             </div>
+
+            <div className="space-y-2 border-t border-white/10 pt-6">
+              <Label htmlFor="role" className="text-white/70">Tipo de Vínculo</Label>
+              <select
+                id="role"
+                name="role"
+                defaultValue="sublocatario"
+                className="flex h-10 w-full max-w-sm rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
+              >
+                <option value="sublocatario">Dentista sublocatário (cadeira/sala própria)</option>
+                <option value="titular">Titular adicional</option>
+              </select>
+
+              <label className="mt-3 flex items-center gap-2 text-sm text-white/70">
+                <input
+                  type="checkbox"
+                  checked={comLogin}
+                  onChange={(e) => setComLogin(e.target.checked)}
+                  className="h-4 w-4 rounded border-white/20 bg-white/5"
+                />
+                Criar login próprio para este profissional
+              </label>
+              <p className="text-xs text-white/40">
+                Sem login, o cadastro serve apenas para agenda/faturamento. Com login, o profissional acessa o
+                sistema e — se for sublocatário — só vê seus próprios pacientes e agendamentos.
+              </p>
+
+              {comLogin && (
+                <div className="grid gap-4 md:grid-cols-2 mt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-white/70">E-mail de acesso *</Label>
+                    <Input id="email" name="email" type="email" placeholder="dentista@clinica.com.br" required={comLogin} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="senha" className="text-white/70">Senha temporária *</Label>
+                    <Input id="senha" name="senha" type="password" placeholder="Mínimo 6 caracteres" required={comLogin} />
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="flex gap-4">
               <Button type="submit" disabled={pending}>
                 {pending ? "Salvando..." : "Salvar Profissional"}

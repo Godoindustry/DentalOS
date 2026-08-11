@@ -12,12 +12,13 @@ export interface Clinica {
 export interface Profissional {
   id: string
   clinica_id: string
-  user_id: string
+  user_id: string | null
   nome: string
   cro: string
   uf_cro: string
   especialidade_principal: string | null
   porcentagem_comissao: number
+  role: "titular" | "sublocatario"
   ativo: boolean
   created_at: string
 }
