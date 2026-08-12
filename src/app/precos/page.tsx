@@ -13,8 +13,9 @@ const WHATSAPP_VENDAS = "5511966230438"
 
 const plans = [
   {
+    key: "individual",
     name: "Individual",
-    price: "R$ 247",
+    price: "R$ 347",
     period: "/mês",
     description: "1 dentista + bot de WhatsApp com IA para captação e agendamento.",
     icon: Stethoscope,
@@ -34,8 +35,9 @@ const plans = [
     ],
   },
   {
+    key: "clinica",
     name: "Clínica",
-    price: "R$ 697",
+    price: "R$ 997",
     period: "/mês",
     description: "Tudo do Individual + até 4 perfis (dentistas, cadeiras ou salas), com você como administrador geral.",
     icon: Users,
@@ -53,8 +55,9 @@ const plans = [
     ],
   },
   {
+    key: "clinica_plus",
     name: "Clínica Plus",
-    price: "R$ 1.297",
+    price: "R$ 1.797",
     period: "/mês",
     description: "Tudo do Clínica + até 8 perfis, para clínicas maiores com múltiplos consultórios.",
     icon: Building2,
@@ -154,7 +157,7 @@ export default function PrecosPage() {
                   ))}
                 </ul>
                 <Link
-                  href="/ativar"
+                  href={`/ativar?plano=${plan.key}`}
                   className={`flex h-11 w-full items-center justify-center rounded-xl text-sm font-semibold transition-colors ${
                     plan.highlighted
                       ? "bg-[#0D9488] text-white hover:bg-[#0B7C72]"

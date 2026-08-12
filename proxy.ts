@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { createServerClient } from "@supabase/ssr"
 
+const LICENSE_EXEMPT_PATHS = new Set(["/precos", "/ativar"])
+
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next()
   const { pathname } = request.nextUrl
@@ -28,6 +30,12 @@ export async function proxy(request: NextRequest) {
     return response
   }
 
+  // /precos e /ativar são sempre acessíveis (para poder ver planos e ativar
+  // acesso mesmo sem ter uma licença ainda) — inclusive sem estar logado.
+  if (LICENSE_EXEMPT_PATHS.has(pathname)) {
+    return response
+  }
+
   if (!data?.user) {
     const loginUrl = new URL("/login", request.url)
     loginUrl.searchParams.set("redirect", pathname)
@@ -41,15 +49,25 @@ export async function proxy(request: NextRequest) {
   if (!clinicaId) return NextResponse.redirect(new URL("/precos", request.url))
 
   const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString()
-  const { data: license } = await supabase
-    .from("licencas")
-    .select("usada_em")
-    .eq("clinica_id", clinicaId)
-    .eq("usada", true)
-    .gte("usada_em", fourteenDaysAgo)
-    .maybeSingle()
+  const [{ data: license }, { data: assinatura }] = await Promise.all([
+    supabase
+      .from("licencas")
+      .select("usada_em")
+      .eq("clinica_id", clinicaId)
+      .eq("usada", true)
+      .gte("usada_em", fourteenDaysAgo)
+      .maybeSingle(),
+    supabase
+      .from("assinaturas")
+      .select("status")
+      .eq("clinica_id", clinicaId)
+      .eq("status", "authorized")
+      .maybeSingle(),
+  ])
 
-  if (!license) return NextResponse.redirect(new URL("/precos?message=Ative+uma+licenca", request.url))
+  if (!license && !assinatura) {
+    return NextResponse.redirect(new URL("/precos?message=Ative+uma+licenca", request.url))
+  }
 
   return response
 }

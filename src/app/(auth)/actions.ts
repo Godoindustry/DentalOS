@@ -129,6 +129,41 @@ export async function ativarLicenca(formData: FormData) {
   return { success: true, error: "" }
 }
 
+export async function iniciarAssinaturaMP(plano: string) {
+  const { PLANOS, criarAssinaturaMP } = await import("@/lib/mercadopago")
+
+  if (!(plano in PLANOS)) {
+    return { success: false, error: "Plano inválido" }
+  }
+
+  const supabase = await createClient()
+  const { data } = await supabase.auth.getUser()
+  const user = data.user
+  if (!user) {
+    return { success: false, error: "Faça login antes de assinar um plano." }
+  }
+
+  const clinicaId = user.user_metadata?.clinica_id
+  if (!clinicaId) {
+    return { success: false, error: "Clínica não encontrada. Contate o suporte." }
+  }
+  if (!user.email) {
+    return { success: false, error: "Sua conta não tem e-mail cadastrado." }
+  }
+
+  const result = await criarAssinaturaMP({
+    plano: plano as keyof typeof PLANOS,
+    clinicaId,
+    email: user.email,
+  })
+
+  if (result.error) {
+    return { success: false, error: result.error }
+  }
+
+  return { success: true, error: "", initPoint: result.initPoint }
+}
+
 export async function signupAction(_prevState: { success: boolean; error: string } | null, formData: FormData) {
   const nome = formData.get("nome") as string
   const email = formData.get("email") as string
