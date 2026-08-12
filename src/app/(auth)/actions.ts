@@ -68,19 +68,27 @@ export async function loginAction(_prevState: { error: string } | null, formData
     await supabase.auth.refreshSession()
   }
 
-  const admin2 = createAdminClient()
-  clinicaId = user.user_metadata?.clinica_id
-  if (clinicaId) {
-    const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString()
-    const { data: license } = await admin2
-      .from("licencas")
-      .select("usada_em")
-      .eq("clinica_id", clinicaId)
-      .eq("usada", true)
-      .gte("usada_em", fourteenDaysAgo)
-      .maybeSingle()
+  const isMaster = user.user_metadata?.role === "ADMIN"
 
-    if (!license) {
+  if (!isMaster) {
+    const admin2 = createAdminClient()
+    clinicaId = user.user_metadata?.clinica_id
+    if (clinicaId) {
+      const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString()
+      const { data: license } = await admin2
+        .from("licencas")
+        .select("usada_em")
+        .eq("clinica_id", clinicaId)
+        .eq("usada", true)
+        .gte("usada_em", fourteenDaysAgo)
+        .maybeSingle()
+
+      if (!license) {
+        const precosUrl = new URL("/precos", "http://localhost")
+        precosUrl.searchParams.set("message", "Ative uma licenca para acessar o sistema")
+        redirect(precosUrl.toString())
+      }
+    } else {
       const precosUrl = new URL("/precos", "http://localhost")
       precosUrl.searchParams.set("message", "Ative uma licenca para acessar o sistema")
       redirect(precosUrl.toString())
@@ -188,6 +196,7 @@ export async function signupAction(_prevState: { success: boolean; error: string
 
   // 3. Se admin API falhar, tentar via RPC (diretamente no banco)
   if (signUpError || !authData?.user) {
+    console.error("[signupAction] signUpError:", signUpError)
     const { data: rpcResult, error: rpcError } = await admin.rpc("criar_usuario_demo", {
       p_email: email,
       p_password: password,
@@ -221,6 +230,7 @@ export async function signupAction(_prevState: { success: boolean; error: string
   const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
 
   if (signInError) {
+    console.error("[signupAction] signInError:", signInError)
     return { success: false, error: "Conta criada, mas não foi possível entrar automaticamente. Vá para o login." }
   }
 

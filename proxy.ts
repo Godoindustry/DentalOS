@@ -20,7 +20,10 @@ function isStaticAsset(pathname: string) {
   )
 }
 
-async function checkLicense(supabase: ReturnType<typeof createServerClient>, user: { user_metadata?: { clinica_id?: string } }) {
+async function checkLicense(supabase: ReturnType<typeof createServerClient>, user: { user_metadata?: { clinica_id?: string; role?: string } }) {
+  const isMaster = user.user_metadata?.role === "ADMIN"
+  if (isMaster) return true
+
   const clinicaId = user.user_metadata?.clinica_id
   if (!clinicaId) return false
 
