@@ -24,6 +24,14 @@ export interface Profissional {
   cro_verificado_em: string | null
   ativo: boolean
   created_at: string
+  bot_ativo: boolean
+  bot_webhook_slug: string | null
+  bot_whatsapp: string | null
+  bot_zapi_instance_id: string | null
+  bot_zapi_token: string | null
+  bot_zapi_client_token: string | null
+  bot_groq_key_slot: number
+  bot_mensagem_boas_vindas: string | null
 }
 
 export interface Paciente {

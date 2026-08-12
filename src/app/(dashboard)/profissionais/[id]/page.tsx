@@ -14,8 +14,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ArrowLeft, Stethoscope, ShieldCheck, ShieldAlert, ExternalLink } from "lucide-react"
-import { editarProfissional, marcarCroVerificado } from "../../actions"
+import { ArrowLeft, Stethoscope, ShieldCheck, ShieldAlert, ExternalLink, Bot, Copy } from "lucide-react"
+import { editarProfissional, marcarCroVerificado, salvarBotProfissional } from "../../actions"
 import { useProfissional } from "@/lib/queries"
 import { UFS_BRASIL } from "@/lib/validations"
 
@@ -24,6 +24,7 @@ export default function EditarProfissionalPage() {
   const id = params.id as string
   const { data: prof, loading } = useProfissional(id)
   const [state, formAction, pending] = useActionState(editarProfissional, null)
+  const [botState, botFormAction, botPending] = useActionState(salvarBotProfissional, null)
   const [croVerificado, setCroVerificado] = useState(false)
   const [verificando, setVerificando] = useState(false)
   const [croInicializado, setCroInicializado] = useState(false)
@@ -177,6 +178,98 @@ export default function EditarProfissionalPage() {
                 <Link href="/profissionais">Cancelar</Link>
               </Button>
             </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bot className="h-4 w-4 text-primary" />
+            Bot de WhatsApp deste profissional
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form action={(fd) => { fd.set("profissional_id", id); botFormAction(fd) }} className="space-y-6">
+            {botState?.error && (
+              <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
+                {botState.error}
+              </div>
+            )}
+            {botState?.success && (
+              <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 text-sm text-emerald-400">
+                Configuração do bot salva com sucesso
+              </div>
+            )}
+            <label className="flex items-center gap-2 text-sm text-foreground/70">
+              <input
+                type="checkbox"
+                name="bot_ativo"
+                value="true"
+                defaultChecked={prof.bot_ativo}
+                className="h-4 w-4 rounded border-border bg-card"
+              />
+              Bot ativo para este profissional
+            </label>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="bot_whatsapp" className="text-foreground/70">Número WhatsApp (Z-API)</Label>
+                <Input id="bot_whatsapp" name="bot_whatsapp" defaultValue={prof.bot_whatsapp ?? ""} placeholder="(11) 90000-0000" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bot_groq_key_slot" className="text-foreground/70">Chave Groq (n8n)</Label>
+                <select
+                  id="bot_groq_key_slot"
+                  name="bot_groq_key_slot"
+                  defaultValue={String(prof.bot_groq_key_slot ?? 1)}
+                  className="flex h-10 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
+                >
+                  <option value="1">Groq Key 1</option>
+                  <option value="2">Groq Key 2</option>
+                  <option value="3">Groq Key 3</option>
+                </select>
+                <p className="text-xs text-muted-foreground">Credencial cadastrada no n8n — ver seção &quot;Bot como secretária&quot;.</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bot_zapi_instance_id" className="text-foreground/70">Z-API Instance ID</Label>
+                <Input id="bot_zapi_instance_id" name="bot_zapi_instance_id" defaultValue={prof.bot_zapi_instance_id ?? ""} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bot_zapi_token" className="text-foreground/70">Z-API Token</Label>
+                <Input id="bot_zapi_token" name="bot_zapi_token" defaultValue={prof.bot_zapi_token ?? ""} type="password" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bot_zapi_client_token" className="text-foreground/70">Z-API Client-Token</Label>
+                <Input id="bot_zapi_client_token" name="bot_zapi_client_token" defaultValue={prof.bot_zapi_client_token ?? ""} type="password" />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="bot_mensagem_boas_vindas" className="text-foreground/70">Mensagem de boas-vindas (opcional)</Label>
+                <Input id="bot_mensagem_boas_vindas" name="bot_mensagem_boas_vindas" defaultValue={prof.bot_mensagem_boas_vindas ?? ""} placeholder="Usa a mensagem padrão da clínica se vazio" />
+              </div>
+            </div>
+
+            {prof.bot_webhook_slug && (
+              <div className="rounded-xl border border-border bg-card p-4 space-y-2">
+                <Label className="text-foreground/70">URL do webhook (configurar no n8n)</Label>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 text-xs text-foreground break-all">
+                    {typeof window !== "undefined" ? window.location.origin : ""}/api/bot/n8n/{prof.bot_webhook_slug}
+                  </code>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigator.clipboard.writeText(`${window.location.origin}/api/bot/n8n/${prof.bot_webhook_slug}`)}
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            <Button type="submit" disabled={botPending}>
+              {botPending ? "Salvando..." : "Salvar Bot"}
+            </Button>
           </form>
         </CardContent>
       </Card>

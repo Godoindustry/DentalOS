@@ -21,30 +21,63 @@ export async function POST(
     // admin (service role) para não esbarrar em RLS.
     const supabase = createAdminClient();
 
-    const { data: config, error: configError } = await supabase
-      .from("configuracoes_bot")
-      .select("clinica_id, n8n_webhook_secret, ativo, webhook_slug, nome_clinica")
-      .eq("webhook_slug", slug)
+    // Planos Clínica/Clínica Plus: cada dentista tem seu próprio slug/bot.
+    // Plano Individual: um único bot por clínica (configuracoes_bot).
+    // Tenta profissional primeiro, cai para o bot da clínica se não achar.
+    const { data: profissionalBot } = await supabase
+      .from("profissionais")
+      .select("id, clinica_id, bot_ativo, bot_webhook_slug, nome")
+      .eq("bot_webhook_slug", slug)
       .maybeSingle();
 
-    console.log(`[n8n-webhook] Config encontrada:`, config ? { slug: config.webhook_slug, clinica_id: config.clinica_id, ativo: config.ativo } : "null");
+    let clinicaId: string;
+    let webhookSecretSource: string | null = null;
+    let profissionalId: string | null = null;
 
-    if (configError || !config?.webhook_slug) {
-      console.log(`[n8n-webhook] Webhook não encontrado para slug: ${slug}`);
-      return NextResponse.json({ error: "Webhook não encontrado" }, { status: 404 });
-    }
+    if (profissionalBot) {
+      console.log(`[n8n-webhook] Bot de profissional encontrado: ${profissionalBot.id} (${profissionalBot.nome})`);
+      if (!profissionalBot.bot_ativo) {
+        console.log(`[n8n-webhook] Bot inativo para profissional: ${profissionalBot.id}`);
+        return NextResponse.json({ error: "Bot inativo para este profissional" }, { status: 403 });
+      }
+      clinicaId = profissionalBot.clinica_id;
+      profissionalId = profissionalBot.id;
 
-    if (!config.ativo) {
-      console.log(`[n8n-webhook] Bot inativo para slug: ${slug}`);
-      return NextResponse.json({ error: "Bot inativo para esta clínica" }, { status: 403 });
+      const { data: clinicaConfig } = await supabase
+        .from("configuracoes_bot")
+        .select("n8n_webhook_secret")
+        .eq("clinica_id", clinicaId)
+        .maybeSingle();
+      webhookSecretSource = clinicaConfig?.n8n_webhook_secret || null;
+    } else {
+      const { data: config, error: configError } = await supabase
+        .from("configuracoes_bot")
+        .select("clinica_id, n8n_webhook_secret, ativo, webhook_slug, nome_clinica")
+        .eq("webhook_slug", slug)
+        .maybeSingle();
+
+      console.log(`[n8n-webhook] Config de clínica encontrada:`, config ? { slug: config.webhook_slug, clinica_id: config.clinica_id, ativo: config.ativo } : "null");
+
+      if (configError || !config?.webhook_slug) {
+        console.log(`[n8n-webhook] Webhook não encontrado para slug: ${slug}`);
+        return NextResponse.json({ error: "Webhook não encontrado" }, { status: 404 });
+      }
+
+      if (!config.ativo) {
+        console.log(`[n8n-webhook] Bot inativo para slug: ${slug}`);
+        return NextResponse.json({ error: "Bot inativo para esta clínica" }, { status: 403 });
+      }
+
+      clinicaId = config.clinica_id;
+      webhookSecretSource = config.n8n_webhook_secret || null;
     }
 
     const body = await request.text();
     const signature = request.headers.get("x-n8n-signature") || request.headers.get("x-webhook-signature") || "";
     console.log(`[n8n-webhook] Signature recebida: ${signature ? "sim" : "não"}`);
 
-    if (config.n8n_webhook_secret && signature) {
-      const expectedSignature = createHmac("sha256", config.n8n_webhook_secret)
+    if (webhookSecretSource && signature) {
+      const expectedSignature = createHmac("sha256", webhookSecretSource)
         .update(body)
         .digest("hex");
       const signatureBuf = Buffer.from(signature, "hex")
@@ -65,8 +98,6 @@ export async function POST(
       return NextResponse.json({ error: "Campos obrigatórios faltando" }, { status: 400 });
     }
 
-    const clinicaId = config.clinica_id;
-
     const { data: existente } = await supabase
       .from("bot_mensagens_processadas")
       .select("id")
@@ -81,7 +112,7 @@ export async function POST(
     let pacientePotencialId: string | null = null;
     const { data: potencial } = await supabase
       .from("pacientes_potenciais")
-      .select("id, status")
+      .select("id, status, profissional_id")
       .eq("telefone", sender_id)
       .eq("clinica_id", clinicaId)
       .maybeSingle();
@@ -96,6 +127,8 @@ export async function POST(
           ultima_interacao: new Date().toISOString(),
           ultima_mensagem: message.slice(0, 500),
           etapa_atual: etapa || "",
+          // Não reatribui um lead que já pertence a outro dentista da mesma clínica
+          profissional_id: potencial.profissional_id ?? profissionalId,
         })
         .eq("id", potencial.id);
       if (updateError) console.error("[n8n-webhook] Erro ao atualizar paciente potencial:", updateError);
@@ -105,6 +138,7 @@ export async function POST(
         .from("pacientes_potenciais")
         .insert({
           clinica_id: clinicaId,
+          profissional_id: profissionalId,
           nome: `Contato ${sender_id.slice(-4)}`,
           telefone: sender_id,
           canal,
@@ -121,6 +155,7 @@ export async function POST(
 
     const { error: conversaError } = await supabase.from("conversas_bot").insert({
       clinic_id: String(clinicaId),
+      profissional_id: profissionalId,
       paciente_potencial_id: pacientePotencialId,
       canal,
       sender_id,

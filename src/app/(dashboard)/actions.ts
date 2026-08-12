@@ -430,6 +430,43 @@ export async function salvarPerfil(_prevState: { error?: string; success?: boole
   return { success: true }
 }
 
+export async function salvarBotProfissional(_prevState: { error?: string; success?: boolean } | null, formData: FormData) {
+  const supabase = await createClient()
+  const profissionalId = formData.get("profissional_id") as string
+  if (!profissionalId) return { error: "Profissional é obrigatório" }
+
+  const { data: prof, error: profError } = await supabase
+    .from("profissionais")
+    .select("id, nome, bot_webhook_slug")
+    .eq("id", profissionalId)
+    .maybeSingle()
+  if (profError || !prof) return { error: "Profissional não encontrado" }
+
+  let webhookSlug = prof.bot_webhook_slug || ""
+  if (!webhookSlug) {
+    const base = prof.nome.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 30)
+    webhookSlug = `${base || "dentista"}-${Math.random().toString(36).slice(2, 7)}`
+  }
+
+  const groqSlot = parseInt(formData.get("bot_groq_key_slot") as string, 10)
+
+  const { error } = await supabase.from("profissionais").update({
+    bot_ativo: formData.get("bot_ativo") === "true",
+    bot_whatsapp: (formData.get("bot_whatsapp") as string || "").trim(),
+    bot_zapi_instance_id: (formData.get("bot_zapi_instance_id") as string || "").trim(),
+    bot_zapi_token: (formData.get("bot_zapi_token") as string || "").trim(),
+    bot_zapi_client_token: (formData.get("bot_zapi_client_token") as string || "").trim(),
+    bot_groq_key_slot: [1, 2, 3].includes(groqSlot) ? groqSlot : 1,
+    bot_mensagem_boas_vindas: (formData.get("bot_mensagem_boas_vindas") as string || "").trim(),
+    bot_webhook_slug: webhookSlug,
+  }).eq("id", profissionalId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath(`/profissionais/${profissionalId}`)
+  return { success: true }
+}
+
 export async function salvarConfiguracaoBot(_prevState: { error?: string; success?: boolean } | null, formData: FormData) {
   const supabase = await createClient()
   const clinicaId = await getClinicaId(supabase)
