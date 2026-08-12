@@ -435,20 +435,55 @@ export async function salvarConfiguracaoBot(_prevState: { error?: string; succes
   const clinicaId = await getClinicaId(supabase)
   if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
 
+  const { data: existing } = await supabase
+    .from("configuracoes_bot")
+    .select("webhook_slug")
+    .eq("clinica_id", clinicaId)
+    .maybeSingle()
+
+  let webhookSlug = existing?.webhook_slug || ""
+  if (!webhookSlug) {
+    const base = (formData.get("nome_clinica") as string || "clinica").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 30)
+    const { data: slugCheck } = await supabase.from("configuracoes_bot").select("webhook_slug").eq("webhook_slug", base).maybeSingle()
+    if (slugCheck) {
+      webhookSlug = `${base}-${Math.random().toString(36).slice(2, 7)}`
+    } else {
+      webhookSlug = base || `clinica-${Math.random().toString(36).slice(2, 7)}`
+    }
+  }
+
+  const n8nWebhookUrl = (formData.get("n8n_webhook_url") as string || "").trim()
+  const n8nWebhookSecret = (formData.get("n8n_webhook_secret") as string || "").trim()
+
   const { error } = await supabase.from("configuracoes_bot").upsert({
     clinica_id: clinicaId,
     nome_clinica: formData.get("nome_clinica") as string || "",
+    endereco: formData.get("endereco") as string || "",
+    cidade: formData.get("cidade") as string || "",
+    horario_funcionamento: formData.get("horario_funcionamento") as string || "",
     telefone: formData.get("telefone") as string || "",
     whatsapp: formData.get("whatsapp") as string || "",
-    horario_funcionamento: formData.get("horario_funcionamento") as string || "",
     google_calendar_id: formData.get("google_calendar_id") as string || "",
     mensagem_boas_vindas: formData.get("mensagem_boas_vindas") as string || "",
     mensagem_urgencia: formData.get("mensagem_urgencia") as string || "",
     transferencia_humano: formData.get("transferencia_humano") as string || "",
+    ia_model: formData.get("ia_model") as string || "llama-3.1-8b-instant",
+    ia_temperature: parseFloat(formData.get("ia_temperature") as string) || 0.2,
     ativo: formData.get("ativo") === "true",
+    n8n_webhook_url: n8nWebhookUrl,
+    n8n_webhook_secret: n8nWebhookSecret,
+    webhook_slug: webhookSlug,
   }, { onConflict: "clinica_id" })
 
   if (error) return { error: error.message }
+
+  if (n8nWebhookUrl) {
+    const { setReceivedWebhook } = await import("@/lib/zapi")
+    const result = await setReceivedWebhook(n8nWebhookUrl)
+    if (result.error) {
+      console.error("Aviso: Z-API webhook não atualizado:", result.error)
+    }
+  }
 
   revalidatePath("/configuracoes")
   return { success: true }

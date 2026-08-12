@@ -51,6 +51,10 @@ export async function setReceivedWebhook(webhookUrl: string) {
     return { error: "Z-API credentials missing" };
   }
 
+  if (!webhookUrl || !/^https?:\/\/.+/.test(webhookUrl)) {
+    return { error: "URL do webhook inválida. Deve começar com http:// ou https://" };
+  }
+
   try {
     const response = await fetch(`${ZAPI_BASE_URL}/update-webhook-received`, {
       method: 'PUT',

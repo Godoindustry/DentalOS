@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Building2, Bell, Shield, Palette, Check, User } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { salvarClinica, salvarPerfil, salvarConfiguracaoBot } from "../actions"
+import { TestBotButton } from "@/components/test-bot-button"
 
 const supabase = createClient()
 
@@ -25,9 +26,14 @@ export default function ConfiguracoesPage() {
   const [perfil, setPerfil] = useState<any>(null)
   const [configBot, setConfigBot] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [origin, setOrigin] = useState("")
   const [state, formAction, pending] = useActionState(salvarClinica, null)
   const [perfilState, perfilAction, perfilPending] = useActionState(salvarPerfil, null)
   const [botState, botAction, botPending] = useActionState(salvarConfiguracaoBot, null)
+
+  useEffect(() => {
+    setOrigin(typeof window !== "undefined" ? window.location.origin : "")
+  }, [])
 
   useEffect(() => {
     const load = async () => {
@@ -264,11 +270,22 @@ export default function ConfiguracoesPage() {
                         <Input id="horario_funcionamento" name="horario_funcionamento" defaultValue={configBot?.horario_funcionamento ?? ""} placeholder="seg a sex 08:00-18:00" />
                       </div>
                       <div className="space-y-2 md:col-span-2">
-                        <Label htmlFor="google_calendar_id" className="text-white/70">Google Calendar ID</Label>
-                        <Input id="google_calendar_id" name="google_calendar_id" defaultValue={configBot?.google_calendar_id ?? ""} placeholder="ex: seuemail@group.calendar.google.com" />
+                        <Label htmlFor="n8n_webhook_url" className="text-white/70">Webhook n8n</Label>
+                        <Input id="n8n_webhook_url" name="n8n_webhook_url" defaultValue={configBot?.n8n_webhook_url ?? ""} placeholder="https://n8n.seudominio.com/webhook/odontolab-bot" />
                         <p className="text-xs text-white/40">
-                          ID da agenda Google que receberá os agendamentos automáticos criados no sistema.
+                          Cole aqui a URL do webhook do seu fluxo n8n. Quando salvar, a Z-API será automaticamente configurada para enviar mensagens recebidas para esse endereço.
                         </p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="n8n_webhook_secret" className="text-white/70">Segredo do Webhook n8n</Label>
+                        <Input id="n8n_webhook_secret" name="n8n_webhook_secret" type="password" defaultValue={configBot?.n8n_webhook_secret ?? ""} placeholder="Segredo para validar assinatura HMAC" />
+                        <p className="text-xs text-white/40">
+                          Use o mesmo segredo configurado no n8n para validar que as requisições são legítimas.
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="ia_model" className="text-white/70">Modelo de IA</Label>
+                        <Input id="ia_model" name="ia_model" defaultValue={configBot?.ia_model ?? "llama-3.1-8b-instant"} placeholder="llama-3.1-8b-instant" />
                       </div>
                     </div>
 
@@ -323,6 +340,11 @@ export default function ConfiguracoesPage() {
                         className="flex w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
                       />
                     </div>
+                    <input
+                      type="hidden"
+                      name="webhook_slug"
+                      value={configBot?.webhook_slug || ""}
+                    />
                     <label className="flex items-center gap-2 text-sm text-white/70">
                       <input
                         type="checkbox"
@@ -333,6 +355,30 @@ export default function ConfiguracoesPage() {
                       />
                       Bot ativo
                     </label>
+
+                    {configBot?.webhook_slug && (
+                      <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-2">
+                        <p className="text-xs font-bold text-white/60 uppercase tracking-wider">URL do seu Webhook n8n</p>
+                        <p className="text-xs text-white/40">
+                          Use esta URL no n8n como endpoint do webhook:
+                        </p>
+                        <code className="block w-full break-all rounded-lg bg-black/30 px-3 py-2 text-xs text-primary">
+                          {origin}/api/bot/n8n/{configBot.webhook_slug}
+                        </code>
+                        <p className="text-[11px] text-white/30">
+                          Não compartilhe essa URL publicamente. Use o segredo abaixo para validar as requisições.
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-2">
+                      <p className="text-xs font-bold text-white/60 uppercase tracking-wider">Testar envio de mensagem</p>
+                      <p className="text-xs text-white/40">
+                        Envie uma mensagem de teste para <strong className="text-white/70">{configBot?.whatsapp || "+55 11 966230438"}</strong> para verificar se a Z-API está conectada.
+                      </p>
+                      <TestBotButton whatsapp={configBot?.whatsapp} />
+                    </div>
+
                     <Button type="submit" disabled={botPending}>
                       {botPending ? "Salvando..." : "Salvar Configurações do Bot"}
                     </Button>

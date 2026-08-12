@@ -95,7 +95,11 @@ export async function signupAction(_prevState: { success: boolean; error: string
 
   if (clinicaError) {
     console.error("[signupAction] clinicaError:", clinicaError)
-    return { success: false, error: "Erro ao criar clínica" }
+    const msg = clinicaError.message || "Erro ao criar clínica"
+    if (msg.includes("relation") || msg.includes("does not exist")) {
+      return { success: false, error: "Erro: tabela de clínicas não encontrada. Contate o suporte." }
+    }
+    return { success: false, error: `Erro ao criar clínica: ${msg}` }
   }
 
   // 2. Tentar criar usuário via admin API
