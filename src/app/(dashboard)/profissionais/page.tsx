@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Plus, Search, Stethoscope } from "lucide-react"
+import { Plus, Search, Stethoscope, ShieldCheck, ShieldAlert } from "lucide-react"
 import { useProfissionais } from "@/lib/queries"
 
 export default function ProfissionaisPage() {
@@ -103,7 +103,16 @@ export default function ProfissionaisPage() {
                         <span className="font-medium text-white">{prof.nome}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-white/60">{prof.cro}-{prof.uf_cro}</TableCell>
+                    <TableCell className="text-white/60">
+                      <div className="flex items-center gap-1.5">
+                        {prof.cro}-{prof.uf_cro}
+                        {prof.cro_verificado ? (
+                          <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" aria-label="CRO verificado" />
+                        ) : (
+                          <ShieldAlert className="h-3.5 w-3.5 text-amber-400" aria-label="CRO não verificado" />
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell className="text-white/60">{prof.especialidade_principal || "–"}</TableCell>
                     <TableCell className="text-white/60">{prof.porcentagem_comissao}%</TableCell>
                     <TableCell>

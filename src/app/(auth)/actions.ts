@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
-import { UFS_BRASIL } from "@/lib/validations"
+import { UFS_BRASIL, croValido } from "@/lib/validations"
 
 const UF_SET = new Set<string>(UFS_BRASIL)
 
@@ -139,7 +139,7 @@ export async function signupAction(_prevState: { success: boolean; error: string
   if (!nome || !email || !password || !cro || !ufCro) return { success: false, error: "Preencha todos os campos" }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { success: false, error: "E-mail inválido" }
   if (password.length < 6) return { success: false, error: "A senha deve ter no mínimo 6 caracteres" }
-  if (!/^\d{3,6}$/.test(cro)) return { success: false, error: "CRO deve conter de 3 a 6 dígitos numéricos" }
+  if (!croValido(cro)) return { success: false, error: "CRO inválido: deve conter de 3 a 6 dígitos numéricos e não pode ser uma sequência óbvia" }
   if (!UF_SET.has(ufCro)) return { success: false, error: "UF do CRO inválida" }
 
   const admin = createAdminClient()

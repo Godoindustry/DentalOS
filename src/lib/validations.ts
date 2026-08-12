@@ -23,9 +23,22 @@ export const pacienteSchema = z.object({
   observacoes: z.string().trim().optional().nullable(),
 })
 
+/** Valida formato do CRO. Não existe API pública para checar se um CRO é
+ * real/ativo (o CFO descontinuou a consulta federal, e cada conselho
+ * estadual faz a própria busca sem API oficial) — por isso a validação
+ * automática se limita a formato + heurística anti-fraude óbvia. A
+ * conferência real fica a cargo de verificação manual (ver
+ * cro_verificado em profissionais). */
+export function croValido(cro: string): boolean {
+  if (!/^\d{3,6}$/.test(cro)) return false
+  if (/^(\d)\1+$/.test(cro)) return false // todos os dígitos iguais (ex: 000000, 11111)
+  if (/^0+$/.test(cro)) return false
+  return true
+}
+
 export const profissionalSchema = z.object({
   nome: z.string().trim().min(2, "Nome deve ter ao menos 2 caracteres"),
-  cro: z.string().trim().regex(/^\d{3,6}$/, "CRO deve conter de 3 a 6 dígitos numéricos"),
+  cro: z.string().trim().refine(croValido, "CRO inválido: deve conter de 3 a 6 dígitos numéricos e não pode ser uma sequência óbvia"),
   uf_cro: z.enum(UFS_BRASIL, { message: "UF do CRO inválida" }),
   especialidade: z.string().trim().optional().nullable(),
   comissao: z.coerce.number().min(0, "Comissão não pode ser negativa").max(100, "Comissão não pode passar de 100%"),

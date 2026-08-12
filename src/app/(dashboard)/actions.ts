@@ -787,3 +787,36 @@ export async function enviarRelatorioMensal() {
 
   return { success: true }
 }
+
+export async function marcarCroVerificado(profissionalId: string) {
+  const supabase = await createClient()
+  const { data: user } = await supabase.auth.getUser()
+  if (!user.user) return { error: "Usuário não autenticado" }
+
+  const clinicaId = await getClinicaId(supabase)
+  if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
+
+  const { data: profissional } = await supabase
+    .from("profissionais")
+    .select("clinica_id")
+    .eq("id", profissionalId)
+    .maybeSingle()
+
+  if (!profissional || profissional.clinica_id !== clinicaId) {
+    return { error: "Profissional não encontrado ou não pertence a esta clínica" }
+  }
+
+  const { error } = await supabase
+    .from("profissionais")
+    .update({
+      cro_verificado: true,
+      cro_verificado_em: new Date().toISOString(),
+      cro_verificado_por: user.user.id,
+    })
+    .eq("id", profissionalId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath("/profissionais")
+  return { success: true }
+}

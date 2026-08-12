@@ -20,6 +20,8 @@ export interface Profissional {
   porcentagem_comissao: number
   role: "titular" | "sublocatario"
   google_calendar_id: string | null
+  cro_verificado: boolean
+  cro_verificado_em: string | null
   ativo: boolean
   created_at: string
 }

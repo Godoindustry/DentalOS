@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useState } from "react"
 import { useParams } from "next/navigation"
 import { PageTransition } from "@/components/ui/page-transition"
 import Link from "next/link"
@@ -14,15 +14,31 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ArrowLeft, Stethoscope } from "lucide-react"
-import { editarProfissional } from "../../actions"
+import { ArrowLeft, Stethoscope, ShieldCheck, ShieldAlert, ExternalLink } from "lucide-react"
+import { editarProfissional, marcarCroVerificado } from "../../actions"
 import { useProfissional } from "@/lib/queries"
+import { UFS_BRASIL } from "@/lib/validations"
 
 export default function EditarProfissionalPage() {
   const params = useParams()
   const id = params.id as string
   const { data: prof, loading } = useProfissional(id)
   const [state, formAction, pending] = useActionState(editarProfissional, null)
+  const [croVerificado, setCroVerificado] = useState(false)
+  const [verificando, setVerificando] = useState(false)
+  const [croInicializado, setCroInicializado] = useState(false)
+
+  if (prof && !croInicializado) {
+    setCroVerificado(prof.cro_verificado)
+    setCroInicializado(true)
+  }
+
+  async function handleMarcarVerificado() {
+    setVerificando(true)
+    const result = await marcarCroVerificado(id)
+    if (result?.success) setCroVerificado(true)
+    setVerificando(false)
+  }
 
   if (loading) {
     return (
@@ -90,11 +106,55 @@ export default function EditarProfissionalPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="uf_cro" className="text-white/70">UF do CRO *</Label>
-                <Input id="uf_cro" name="uf_cro" defaultValue={prof.uf_cro} maxLength={2} required />
+                <select
+                  id="uf_cro"
+                  name="uf_cro"
+                  defaultValue={prof.uf_cro}
+                  required
+                  className="flex h-10 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
+                >
+                  <option value="">UF</option>
+                  {UFS_BRASIL.map((uf) => (
+                    <option key={uf} value={uf}>{uf}</option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="comissao" className="text-white/70">Porcentagem de Comissão (%)</Label>
                 <Input id="comissao" name="comissao" type="number" step="0.01" defaultValue={prof.porcentagem_comissao} />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-4">
+                  <div className="flex items-center gap-2 text-sm">
+                    {croVerificado ? (
+                      <>
+                        <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                        <span className="text-emerald-400">CRO verificado manualmente</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShieldAlert className="h-4 w-4 text-amber-400" />
+                        <span className="text-amber-400">CRO ainda não verificado</span>
+                      </>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button type="button" variant="outline" size="sm" asChild>
+                      <a href="https://busca-profissionais.cfo.org.br/" target="_blank" rel="noopener noreferrer">
+                        Verificar no CFO <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
+                      </a>
+                    </Button>
+                    {!croVerificado && (
+                      <Button type="button" size="sm" disabled={verificando} onClick={handleMarcarVerificado}>
+                        {verificando ? "Marcando..." : "Marcar como verificado"}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                <p className="text-xs text-white/40">
+                  Não existe API pública para validar CRO automaticamente. Confira no site oficial do CFO
+                  (nome + CRO + UF) e marque como verificado depois de confirmar.
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="ativo" className="text-white/70">Status</Label>
