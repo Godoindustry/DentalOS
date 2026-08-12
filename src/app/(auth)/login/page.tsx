@@ -17,6 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { loginAction } from "../actions"
+import { createClient } from "@/lib/supabase/client"
 
 export default function LoginPage() {
   const [state, formAction, pending] = useActionState(loginAction, null)
@@ -91,7 +92,15 @@ export default function LoginPage() {
               type="button"
               variant="outline"
               className="w-full h-11 bg-white/5 border-white/10 hover:bg-white/10 text-white"
-              onClick={() => (window.location.href = "/api/auth/google")}
+              onClick={() => {
+                const supabase = createClient();
+                supabase.auth.signInWithOAuth({
+                  provider: 'google',
+                  options: {
+                    redirectTo: `${window.location.origin}/api/auth/callback`,
+                  },
+                });
+              }}
             >
               <svg viewBox="0 0 24 24" className="mr-2 h-4 w-4">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>

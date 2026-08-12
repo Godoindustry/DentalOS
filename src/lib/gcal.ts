@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import { createAdminClient } from './supabase/admin';
+import { createClient } from './supabase/server';
 
 const CALLBACK_URL = process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/google/callback';
 
@@ -9,26 +10,103 @@ export const oauth2Client = new google.auth.OAuth2(
   CALLBACK_URL
 );
 
-export function getGoogleAuthUrl(clinicaId: string) {
-  const scopes = ['https://www.googleapis.com/auth/calendar.events'];
+export function getGoogleAuthUrl(redirectAfterAuth: string, baseUrl: string) {
+  const scopes = [
+    'https://www.googleapis.com/auth/calendar.events',
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+  ];
   return oauth2Client.generateAuthUrl({
     access_type: 'offline',
     prompt: 'consent',
     scope: scopes,
-    state: clinicaId,
+    state: JSON.stringify({ redirect: redirectAfterAuth, baseUrl }),
   });
 }
 
-export async function handleGoogleCallback(code: string, clinicaId: string) {
-  const { tokens } = await oauth2Client.getToken(code);
-  const admin = createAdminClient();
-  
-  await admin.from('configuracoes_bot').update({
-    google_refresh_token: tokens.refresh_token,
-    google_access_token: tokens.access_token,
-  }).eq('clinica_id', clinicaId);
+export async function handleGoogleCallback(code: string, state: string) {
+  let redirectAfterAuth = '/dashboard';
+  let baseUrl = '';
 
-  return tokens;
+  try {
+    const parsed = JSON.parse(state);
+    redirectAfterAuth = parsed.redirect || '/dashboard';
+    baseUrl = parsed.baseUrl || '';
+  } catch {
+    // state legado (apenas clinicaId)
+  }
+
+  const { tokens } = await oauth2Client.getToken(code);
+
+  const admin = createAdminClient();
+
+  if (!tokens.access_token) {
+    throw new Error('Token de acesso não recebido do Google');
+  }
+
+  const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+    headers: { Authorization: `Bearer ${tokens.access_token}` },
+  });
+
+  if (!userInfoRes.ok) {
+    throw new Error('Falha ao obter dados do usuário Google');
+  }
+
+  const userInfo = await userInfoRes.json();
+  const email = userInfo.email;
+  const nome = userInfo.name || email.split('@')[0];
+
+  if (!email) {
+    throw new Error('E-mail não fornecido pelo Google');
+  }
+
+  const { data: existingUser } = await admin.auth.admin.listUsers();
+  const authUser = existingUser?.users?.find((u) => u.email === email);
+
+  let clinicaId: string | undefined;
+
+  if (authUser) {
+    clinicaId = authUser.user_metadata?.clinica_id as string | undefined;
+  } else {
+    const { data: newClinica } = await admin
+      .from('clinicas')
+      .insert({ nome_fantasia: `Clínica de ${nome}`, plano_assinatura: 'basic' })
+      .select('id')
+      .single();
+
+    if (!newClinica) {
+      throw new Error('Falha ao criar clínica para novo usuário Google');
+    }
+
+    clinicaId = newClinica.id;
+
+    const { data: newAuthUser, error: authError } = await admin.auth.admin.createUser({
+      email,
+      email_confirm: true,
+      user_metadata: { nome, clinica_id: clinicaId, role: 'titular' },
+    });
+
+    if (authError || !newAuthUser?.user) {
+      await admin.from('clinicas').delete().eq('id', clinicaId);
+      throw new Error(authError?.message || 'Falha ao criar usuário no Supabase Auth');
+    }
+
+    await admin.from('profissionais').insert({
+      clinica_id: clinicaId,
+      user_id: newAuthUser.user.id,
+      nome,
+      role: 'titular',
+    });
+  }
+
+  if (baseUrl && clinicaId) {
+    await admin.from('configuracoes_bot').update({
+      google_refresh_token: tokens.refresh_token,
+      google_access_token: tokens.access_token,
+    }).eq('clinica_id', clinicaId);
+  }
+
+  return { tokens, redirectAfterAuth, clinicaId };
 }
 
 export async function createGoogleCalendarEvent({
@@ -81,7 +159,7 @@ export async function createGoogleCalendarEvent({
     };
 
     const res = await calendar.events.insert({
-      calendarId: calendarId,
+      calendarId,
       requestBody: event,
     });
 
@@ -91,3 +169,4 @@ export async function createGoogleCalendarEvent({
     return { error };
   }
 }
+

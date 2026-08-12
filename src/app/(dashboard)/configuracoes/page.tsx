@@ -27,12 +27,32 @@ export default function ConfiguracoesPage() {
   const [configBot, setConfigBot] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [origin, setOrigin] = useState("")
+  const [googleMessage, setGoogleMessage] = useState<string | null>(null)
   const [state, formAction, pending] = useActionState(salvarClinica, null)
   const [perfilState, perfilAction, perfilPending] = useActionState(salvarPerfil, null)
   const [botState, botAction, botPending] = useActionState(salvarConfiguracaoBot, null)
 
   useEffect(() => {
     setOrigin(typeof window !== "undefined" ? window.location.origin : "")
+  }, [])
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const googleStatus = params.get("google")
+    const message = params.get("message")
+
+    if (googleStatus === "connected") {
+      setGoogleMessage("Google Calendar conectado com sucesso!")
+    } else if (googleStatus === "error") {
+      setGoogleMessage(message === "code_ou_state_ausentes" ? "Erro: código ou state ausentes no callback." : "Erro ao conectar com Google Calendar.")
+    }
+
+    if (googleStatus) {
+      const url = new URL(window.location.href)
+      url.searchParams.delete("google")
+      url.searchParams.delete("message")
+      window.history.replaceState({}, "", url)
+    }
   }, [])
 
   useEffect(() => {
@@ -298,6 +318,11 @@ export default function ConfiguracoesPage() {
                               ? "Conectado — novos agendamentos são criados automaticamente na agenda acima."
                               : "Não conectado. Sem isso, os agendamentos não são sincronizados com o Google Calendar."}
                           </p>
+                          {googleMessage && (
+                            <p className={`text-xs mt-1 ${googleMessage.includes("sucesso") ? "text-emerald-400" : "text-red-400"}`}>
+                              {googleMessage}
+                            </p>
+                          )}
                         </div>
                         {configBot?.google_refresh_token ? (
                           <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-400">
