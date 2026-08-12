@@ -2,21 +2,14 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { createServerClient } from "@supabase/ssr"
 
-export async function proxy(request: NextRequest) {
-  let response = NextResponse.next()
+const PUBLIC_PATHS = ["/", "/login", "/cadastro", "/landing"]
 
-  const { pathname } = request.nextUrl
+function isPublicPath(pathname: string) {
+  return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"))
+}
 
-  const isServerAction =
-    request.headers.has("Next-Action") ||
-    request.headers.has("next-action") ||
-    pathname.startsWith("/_next/action")
-
-  if (isServerAction) {
-    return response
-  }
-
-  if (
+function isStaticAsset(pathname: string) {
+  return (
     pathname.startsWith("/_next/") ||
     pathname.startsWith("/api/") ||
     pathname.startsWith("/favicon") ||
@@ -24,14 +17,18 @@ export async function proxy(request: NextRequest) {
     pathname === "/robots.txt" ||
     pathname === "/sitemap.xml" ||
     /\.[a-zA-Z0-9]+$/.test(pathname)
-  ) {
+  )
+}
+
+export async function proxy(request: NextRequest) {
+  let response = NextResponse.next()
+  const { pathname } = request.nextUrl
+
+  if (isStaticAsset(pathname)) {
     return response
   }
 
-  const publicPaths = ["/", "/login", "/cadastro", "/landing"]
-  const isPublicPath = publicPaths.some((p) => pathname === p || pathname.startsWith(p + "/"))
-
-  if (isPublicPath) {
+  if (isPublicPath(pathname)) {
     if (pathname === "/" || pathname === "/login" || pathname === "/cadastro") {
       const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -80,6 +77,17 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|_next/action|favicon\\.ico|favicon\\.png|manifest\\.json|robots\\.txt|sitemap\\.xml|apple-touch-icon|android-chrome-|mstile-|safari-pinned-tab).*)",
+    "/dashboard/:path*",
+    "/pacientes/:path*",
+    "/profissionais/:path*",
+    "/procedimentos/:path*",
+    "/agendamentos/:path*",
+    "/faturamento/:path*",
+    "/financeiro-cadeiras/:path*",
+    "/odontograma/:path*",
+    "/anamnese/:path*",
+    "/bot/:path*",
+    "/configuracoes/:path*",
+    "/pacientes-potenciais/:path*",
   ],
 }
