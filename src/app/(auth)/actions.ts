@@ -25,7 +25,7 @@ export async function loginAction(_prevState: { error: string } | null, formData
   const { data } = await supabase.auth.getUser()
   const user = data.user
   if (!user) return { error: "Não foi possível validar a sessão após o login" }
-  const clinicaId = user.user_metadata?.clinica_id
+  let clinicaId = user.user_metadata?.clinica_id
 
   const admin = createAdminClient()
 
@@ -68,7 +68,81 @@ export async function loginAction(_prevState: { error: string } | null, formData
     await supabase.auth.refreshSession()
   }
 
+  const admin2 = createAdminClient()
+  clinicaId = user.user_metadata?.clinica_id
+  if (clinicaId) {
+    const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString()
+    const { data: license } = await admin2
+      .from("licencas")
+      .select("usada_em")
+      .eq("clinica_id", clinicaId)
+      .eq("usada", true)
+      .gte("usada_em", fourteenDaysAgo)
+      .maybeSingle()
+
+    if (!license) {
+      const precosUrl = new URL("/precos", "http://localhost")
+      precosUrl.searchParams.set("message", "Ative uma licenca para acessar o sistema")
+      redirect(precosUrl.toString())
+    }
+  }
+
   redirect("/dashboard")
+}
+
+export async function ativarLicenca(formData: FormData) {
+  const supabase = await createClient()
+  const admin = createAdminClient()
+
+  const codigo = (formData.get("codigo") as string)?.trim().toUpperCase()
+  if (!codigo) return { success: false, error: "Codigo de licenca obrigatorio" }
+
+  const { data: license, error: licenseError } = await admin
+    .from("licencas")
+    .select("*")
+    .eq("codigo", codigo)
+    .eq("usada", false)
+    .maybeSingle()
+
+  if (licenseError || !license) {
+    return { success: false, error: "Licenca invalida ou ja utilizada" }
+  }
+
+  const { data: authData } = await supabase.auth.getUser()
+  const user = authData.user
+  if (!user) {
+    return { success: false, error: "Sessao expirada. Faca login novamente." }
+  }
+
+  const clinicaId = user.user_metadata?.clinica_id
+  if (!clinicaId) {
+    return { success: false, error: "Clinica nao encontrada. Contate o suporte." }
+  }
+
+  const { error: updateError } = await admin
+    .from("licencas")
+    .update({
+      usada: true,
+      usada_em: new Date().toISOString(),
+      usada_por: user.id,
+      clinica_id: clinicaId,
+    })
+    .eq("id", license.id)
+
+  if (updateError) {
+    return { success: false, error: "Erro ao ativar licenca. Tente novamente." }
+  }
+
+  await admin.auth.admin.updateUserById(user.id, {
+    user_metadata: {
+      ...user.user_metadata,
+      licenca_ativa: true,
+      licenca_plano: license.plano,
+      licenca_usada_em: new Date().toISOString(),
+    },
+  })
+
+  return { success: true, error: "" }
 }
 
 export async function signupAction(_prevState: { success: boolean; error: string } | null, formData: FormData) {
