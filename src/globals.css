@@ -92,6 +92,25 @@
   --body-gradient:
     radial-gradient(circle at 18% 0%, rgba(79, 209, 197, 0.12), transparent 30%),
     linear-gradient(135deg, #002B36 0%, #08353E 48%, #052F38 100%);
+
+  /* Re-declare the derived @theme tokens so nested .dark wrappers (auth/landing pages
+     that stay dark while the rest of the app is light) actually pick up dark values —
+     custom properties inherit their *computed* value, so without this the tokens stay
+     baked to whatever :root resolved them to. */
+  --color-background: var(--color-bg-primary);
+  --color-foreground: var(--color-text-primary);
+  --color-secondary: var(--color-bg-tertiary);
+  --color-secondary-foreground: var(--color-text-primary);
+  --color-muted: var(--color-bg-tertiary);
+  --color-muted-foreground: var(--color-text-secondary);
+  --color-accent: var(--color-bg-tertiary);
+  --color-accent-foreground: var(--color-text-primary);
+  --color-border: var(--glass-border);
+  --color-input: var(--glass-border-strong);
+  --color-card: var(--glass-fill);
+  --color-card-foreground: var(--color-text-primary);
+  --color-popover: var(--color-popover-bg);
+  --color-popover-foreground: var(--color-text-primary);
 }
 
 * {

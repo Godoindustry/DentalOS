@@ -56,7 +56,7 @@ export default function EditarProfissionalPage() {
           <Button variant="ghost" size="icon" asChild>
             <Link href="/profissionais"><ArrowLeft className="h-4 w-4" /></Link>
           </Button>
-          <h1 className="text-2xl font-bold text-white">Profissional não encontrado</h1>
+          <h1 className="text-2xl font-bold text-foreground">Profissional não encontrado</h1>
         </div>
       </PageTransition>
     )
@@ -71,8 +71,8 @@ export default function EditarProfissionalPage() {
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">{prof.nome}</h1>
-          <p className="text-sm text-white/50">Editar dados do profissional</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{prof.nome}</h1>
+          <p className="text-sm text-muted-foreground">Editar dados do profissional</p>
         </div>
       </div>
 
@@ -93,25 +93,25 @@ export default function EditarProfissionalPage() {
             <input type="hidden" name="id" value={id} />
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="nome" className="text-white/70">Nome Completo *</Label>
+                <Label htmlFor="nome" className="text-foreground/70">Nome Completo *</Label>
                 <Input id="nome" name="nome" defaultValue={prof.nome} required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="especialidade" className="text-white/70">Especialidade Principal</Label>
+                <Label htmlFor="especialidade" className="text-foreground/70">Especialidade Principal</Label>
                 <Input id="especialidade" name="especialidade" defaultValue={prof.especialidade_principal ?? ""} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="cro" className="text-white/70">CRO *</Label>
+                <Label htmlFor="cro" className="text-foreground/70">CRO *</Label>
                 <Input id="cro" name="cro" defaultValue={prof.cro} required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="uf_cro" className="text-white/70">UF do CRO *</Label>
+                <Label htmlFor="uf_cro" className="text-foreground/70">UF do CRO *</Label>
                 <select
                   id="uf_cro"
                   name="uf_cro"
                   defaultValue={prof.uf_cro}
                   required
-                  className="flex h-10 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
+                  className="flex h-10 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
                 >
                   <option value="">UF</option>
                   {UFS_BRASIL.map((uf) => (
@@ -120,11 +120,11 @@ export default function EditarProfissionalPage() {
                 </select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="comissao" className="text-white/70">Porcentagem de Comissão (%)</Label>
+                <Label htmlFor="comissao" className="text-foreground/70">Porcentagem de Comissão (%)</Label>
                 <Input id="comissao" name="comissao" type="number" step="0.01" defaultValue={prof.porcentagem_comissao} />
               </div>
               <div className="space-y-2 md:col-span-2">
-                <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-4">
+                <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4">
                   <div className="flex items-center gap-2 text-sm">
                     {croVerificado ? (
                       <>
@@ -151,17 +151,17 @@ export default function EditarProfissionalPage() {
                     )}
                   </div>
                 </div>
-                <p className="text-xs text-white/40">
+                <p className="text-xs text-muted-foreground">
                   Não existe API pública para validar CRO automaticamente. Confira no site oficial do CFO
                   (nome + CRO + UF) e marque como verificado depois de confirmar.
                 </p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="ativo" className="text-white/70">Status</Label>
+                <Label htmlFor="ativo" className="text-foreground/70">Status</Label>
                 <select
                   id="ativo" name="ativo"
                   defaultValue={String(prof.ativo)}
-                  className="flex h-10 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="flex h-10 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
                 >
                   <option value="true">Ativo</option>
                   <option value="false">Inativo</option>

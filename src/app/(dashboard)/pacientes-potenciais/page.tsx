@@ -51,8 +51,8 @@ export default function PacientesPotenciaisPage() {
     <PageTransition className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Potenciais Pacientes</h1>
-          <p className="text-sm text-white/50">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Potenciais Pacientes</h1>
+          <p className="text-sm text-muted-foreground">
             Pacientes que iniciaram contato pelo bot Telegram mas ainda não foram cadastrados
           </p>
         </div>
@@ -61,7 +61,7 @@ export default function PacientesPotenciaisPage() {
       <Card>
         <CardHeader>
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
             <Input
               placeholder="Buscar por nome ou telefone..."
               className="pl-10"
@@ -74,11 +74,11 @@ export default function PacientesPotenciaisPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-white/50">Paciente</TableHead>
-                <TableHead className="text-white/50">Telefone</TableHead>
-                <TableHead className="text-white/50">Status</TableHead>
-                <TableHead className="text-white/50">Última Interação</TableHead>
-                <TableHead className="text-right text-white/50">Ações</TableHead>
+                <TableHead className="text-muted-foreground">Paciente</TableHead>
+                <TableHead className="text-muted-foreground">Telefone</TableHead>
+                <TableHead className="text-muted-foreground">Status</TableHead>
+                <TableHead className="text-muted-foreground">Última Interação</TableHead>
+                <TableHead className="text-right text-muted-foreground">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -92,7 +92,7 @@ export default function PacientesPotenciaisPage() {
                 ))
               ) : filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-12 text-white/40">
+                  <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
                     {search ? "Nenhum potencial paciente encontrado" : "Nenhum contato do bot Telegram ainda"}
                   </TableCell>
                 </TableRow>
@@ -100,23 +100,23 @@ export default function PacientesPotenciaisPage() {
                 filtered.map((p) => {
                   const cfg = statusConfig[p.status] || statusConfig.em_triagem
                   return (
-                    <TableRow key={p.id} className="hover:bg-white/[0.03] border-white/[0.06]">
+                    <TableRow key={p.id} className="hover:bg-card border-border">
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
                             <MessageCircle className="h-4 w-4 text-primary" />
                           </div>
-                          <span className="font-medium text-white">{p.nome || "Anônimo"}</span>
+                          <span className="font-medium text-foreground">{p.nome || "Anônimo"}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-white/60">{p.telefone || "–"}</TableCell>
+                      <TableCell className="text-muted-foreground">{p.telefone || "–"}</TableCell>
                       <TableCell>
                         <Badge variant={cfg.variant}>
                           <cfg.icon className="h-3 w-3 mr-1" />
                           {cfg.label}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-white/60">
+                      <TableCell className="text-muted-foreground">
                         {p.ultima_interacao
                           ? new Date(p.ultima_interacao).toLocaleString("pt-BR")
                           : "–"}

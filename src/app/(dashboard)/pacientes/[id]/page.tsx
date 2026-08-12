@@ -146,7 +146,7 @@ export default function PacienteDetalhe() {
   if (!paciente) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-white/40">Paciente não encontrado</p>
+        <p className="text-muted-foreground">Paciente não encontrado</p>
       </div>
     )
   }
@@ -161,10 +161,10 @@ export default function PacienteDetalhe() {
         </Button>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-white">{paciente.nome}</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">{paciente.nome}</h1>
             <Badge variant="success">Ativo</Badge>
           </div>
-          <p className="text-sm text-white/50">Prontuário completo do paciente</p>
+          <p className="text-sm text-muted-foreground">Prontuário completo do paciente</p>
         </div>
         <Button variant="outline" asChild>
           <Link href={`/pacientes/novo?edit=${paciente.id}`}>
@@ -193,8 +193,8 @@ export default function PacienteDetalhe() {
                 <item.icon className="h-4 w-4 text-primary" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs text-white/40">{item.label}</p>
-                <p className="text-sm font-medium text-white truncate">{item.value}</p>
+                <p className="text-xs text-muted-foreground">{item.label}</p>
+                <p className="text-sm font-medium text-foreground truncate">{item.value}</p>
               </div>
             </CardContent>
           </Card>
@@ -204,7 +204,7 @@ export default function PacienteDetalhe() {
       {paciente.observacoes_criticas && (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
           <p className="text-sm font-semibold text-amber-400 mb-1">Observações Críticas</p>
-          <p className="text-sm text-white/70">{paciente.observacoes_criticas}</p>
+          <p className="text-sm text-foreground/70">{paciente.observacoes_criticas}</p>
         </div>
       )}
 
@@ -255,15 +255,15 @@ export default function PacienteDetalhe() {
                   { label: "Responsável Legal", value: paciente.responsavel_legal || "–" },
                 ].map((item) => (
                   <div key={item.label} className="space-y-1">
-                    <p className="text-xs text-white/40">{item.label}</p>
-                    <p className="text-sm font-medium text-white bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2">{item.value}</p>
+                    <p className="text-xs text-muted-foreground">{item.label}</p>
+                    <p className="text-sm font-medium text-foreground bg-card border border-border rounded-lg px-3 py-2">{item.value}</p>
                   </div>
                 ))}
               </div>
               {paciente.observacoes_criticas && (
                 <div className="mt-4 space-y-1">
-                  <p className="text-xs text-white/40">Observações Críticas</p>
-                  <p className="text-sm text-white bg-white/[0.03] border border-amber-500/30 rounded-lg px-3 py-2">{paciente.observacoes_criticas}</p>
+                  <p className="text-xs text-muted-foreground">Observações Críticas</p>
+                  <p className="text-sm text-foreground bg-card border border-amber-500/30 rounded-lg px-3 py-2">{paciente.observacoes_criticas}</p>
                 </div>
               )}
               <div className="mt-4 flex gap-3">
@@ -288,7 +288,7 @@ export default function PacienteDetalhe() {
                   ))}
                 </div>
               ) : history.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-white/40">
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                   <Clock className="h-10 w-10 mb-2 opacity-30" />
                   <p className="text-sm">Nenhum atendimento registrado</p>
                   <p className="text-xs mt-1">Agende uma consulta para o paciente</p>
@@ -306,7 +306,7 @@ export default function PacienteDetalhe() {
                     return (
                       <div
                         key={`${h.tipo}-${h.id}`}
-                        className="flex items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
+                        className="flex items-center gap-4 rounded-xl border border-border bg-card p-4"
                       >
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
                           {h.tipo === "faturamento" ? (
@@ -317,7 +317,7 @@ export default function PacienteDetalhe() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <p className="text-sm font-medium text-white">
+                            <p className="text-sm font-medium text-foreground">
                               {h.procedimento !== "—" ? h.procedimento : "Consulta agendada"}
                             </p>
                             {h.valor > 0 && (
@@ -326,7 +326,7 @@ export default function PacienteDetalhe() {
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-white/40">
+                          <p className="text-xs text-muted-foreground">
                             {new Date(h.data_hora).toLocaleDateString("pt-BR", {
                               day: "2-digit", month: "short", year: "numeric",
                             })}
@@ -355,7 +355,7 @@ export default function PacienteDetalhe() {
               {historyLoading ? (
                 <Skeleton className="h-24" />
               ) : history.filter((h) => h.valor > 0).length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-white/40">
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                   <DollarSign className="h-10 w-10 mb-2 opacity-30" />
                   <p className="text-sm">Nenhum registro financeiro encontrado</p>
                   <p className="text-xs mt-1">Os lançamentos aparecerão automaticamente após o faturamento</p>
@@ -363,7 +363,7 @@ export default function PacienteDetalhe() {
               ) : (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
-                    <span className="text-sm text-white/70">Total Geral do Tratamento</span>
+                    <span className="text-sm text-foreground/70">Total Geral do Tratamento</span>
                     <span className="text-xl font-bold text-emerald-400">{formatCurrency(totalTreatment)}</span>
                   </div>
                   <div className="space-y-2">
@@ -372,11 +372,11 @@ export default function PacienteDetalhe() {
                       .map((h) => (
                         <div
                           key={`fin-${h.tipo}-${h.id}`}
-                          className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] p-3"
+                          className="flex items-center justify-between rounded-xl border border-border bg-card p-3"
                         >
                           <div>
-                            <p className="text-sm text-white">{h.procedimento}</p>
-                            <p className="text-xs text-white/40">
+                            <p className="text-sm text-foreground">{h.procedimento}</p>
+                            <p className="text-xs text-muted-foreground">
                               {new Date(h.data_hora).toLocaleDateString("pt-BR")}
                             </p>
                           </div>

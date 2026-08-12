@@ -101,8 +101,8 @@ export default function FaturamentoPage() {
     <PageTransition className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Faturamento</h1>
-          <p className="text-sm text-white/50">Controle financeiro e análise de lucratividade</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Faturamento</h1>
+          <p className="text-sm text-muted-foreground">Controle financeiro e análise de lucratividade</p>
         </div>
         <Button variant="outline" onClick={handleExportar} disabled={isPending}>
           <Download className="mr-2 h-4 w-4" />
@@ -124,10 +124,10 @@ export default function FaturamentoPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
             >
-              <Card className="group relative overflow-hidden transition-all duration-300 hover:border-white/[0.15] hover:shadow-lg hover:shadow-black/20">
+              <Card className="group relative overflow-hidden transition-all duration-300 hover:border-border hover:shadow-lg hover:shadow-black/20">
                 <div className="absolute inset-x-0 top-0 h-0.5" style={{ background: item.color.bar }} />
                 <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
-                  <CardTitle className="text-sm font-medium text-white/60">{item.titulo}</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{item.titulo}</CardTitle>
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors duration-300 group-hover:brightness-125" style={{ background: item.color.bg }}>
                     <Icon className="h-4 w-4" style={{ color: item.color.bar }} />
                   </div>
@@ -136,7 +136,7 @@ export default function FaturamentoPage() {
                   {loading ? (
                     <Skeleton className="h-8 w-24" />
                   ) : (
-                    <div className="text-2xl font-bold tracking-tight text-white">{item.valor}</div>
+                    <div className="text-2xl font-bold tracking-tight text-foreground">{item.valor}</div>
                   )}
                 </CardContent>
               </Card>
@@ -148,7 +148,7 @@ export default function FaturamentoPage() {
       <Card>
         <CardHeader>
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
             <Input
               placeholder="Buscar por paciente ou procedimento..."
               className="pl-10"
@@ -161,15 +161,15 @@ export default function FaturamentoPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-white/50">Data</TableHead>
-                <TableHead className="text-white/50">Paciente</TableHead>
-                <TableHead className="text-white/50">Procedimento</TableHead>
-                <TableHead className="text-white/50">Profissional</TableHead>
-                <TableHead className="text-white/50">Valor Bruto</TableHead>
-                <TableHead className="text-white/50">Comissão</TableHead>
-                <TableHead className="text-white/50">Lucro Líquido</TableHead>
-                <TableHead className="text-white/50">Status</TableHead>
-                <TableHead className="text-right text-white/50">Ações</TableHead>
+                <TableHead className="text-muted-foreground">Data</TableHead>
+                <TableHead className="text-muted-foreground">Paciente</TableHead>
+                <TableHead className="text-muted-foreground">Procedimento</TableHead>
+                <TableHead className="text-muted-foreground">Profissional</TableHead>
+                <TableHead className="text-muted-foreground">Valor Bruto</TableHead>
+                <TableHead className="text-muted-foreground">Comissão</TableHead>
+                <TableHead className="text-muted-foreground">Lucro Líquido</TableHead>
+                <TableHead className="text-muted-foreground">Status</TableHead>
+                <TableHead className="text-right text-muted-foreground">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -183,7 +183,7 @@ export default function FaturamentoPage() {
                 ))
               ) : filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-12 text-white/40">
+                  <TableCell colSpan={9} className="text-center py-12 text-muted-foreground">
                     {search ? "Nenhum lançamento encontrado" : "Nenhum faturamento registrado ainda"}
                   </TableCell>
                 </TableRow>
@@ -191,21 +191,21 @@ export default function FaturamentoPage() {
                 filtered.map((fat) => {
                   const statusInfo = statusPagamentoMap[fat.status_pagamento] ?? { label: fat.status_pagamento, variant: "default" as const }
                   return (
-                    <TableRow key={fat.id} className="hover:bg-white/[0.03] border-white/[0.06]">
-                      <TableCell className="text-white/60">
+                    <TableRow key={fat.id} className="hover:bg-card border-border">
+                      <TableCell className="text-muted-foreground">
                         {new Date(fat.data_competencia).toLocaleDateString("pt-BR")}
                       </TableCell>
-                      <TableCell className="font-medium text-white">
+                      <TableCell className="font-medium text-foreground">
                         {(fat as any).pacientes?.nome ?? "—"}
                       </TableCell>
-                      <TableCell className="text-white/60">
+                      <TableCell className="text-muted-foreground">
                         {(fat as any).procedimentos?.nome_servico ?? "—"}
                       </TableCell>
-                      <TableCell className="text-white/60">
+                      <TableCell className="text-muted-foreground">
                         {(fat as any).profissionais?.nome ?? "—"}
                       </TableCell>
-                      <TableCell className="text-white/80">{formatCurrency(Number(fat.valor_bruto_pago))}</TableCell>
-                      <TableCell className="text-white/60">{formatCurrency(Number(fat.comissao_retida_dentista))}</TableCell>
+                      <TableCell className="text-foreground">{formatCurrency(Number(fat.valor_bruto_pago))}</TableCell>
+                      <TableCell className="text-muted-foreground">{formatCurrency(Number(fat.comissao_retida_dentista))}</TableCell>
                       <TableCell className="font-semibold text-[#6EE7B7]">
                         {formatCurrency(Number(fat.lucro_liquido_clinica))}
                       </TableCell>

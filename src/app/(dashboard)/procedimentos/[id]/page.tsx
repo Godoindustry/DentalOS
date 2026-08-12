@@ -47,7 +47,7 @@ export default function EditarProcedimentoPage() {
           <Button variant="ghost" size="icon" asChild>
             <Link href="/procedimentos"><ArrowLeft className="h-4 w-4" /></Link>
           </Button>
-          <h1 className="text-2xl font-bold text-white">Procedimento não encontrado</h1>
+          <h1 className="text-2xl font-bold text-foreground">Procedimento não encontrado</h1>
         </div>
       </PageTransition>
     )
@@ -67,8 +67,8 @@ export default function EditarProcedimentoPage() {
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">{proc.nome_servico}</h1>
-          <p className="text-sm text-white/50">Editar dados do procedimento</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{proc.nome_servico}</h1>
+          <p className="text-sm text-muted-foreground">Editar dados do procedimento</p>
         </div>
       </div>
 
@@ -89,11 +89,11 @@ export default function EditarProcedimentoPage() {
             <input type="hidden" name="id" value={id} />
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="nome_servico" className="text-white/70">Nome do Serviço *</Label>
+                <Label htmlFor="nome_servico" className="text-foreground/70">Nome do Serviço *</Label>
                 <Input id="nome_servico" name="nome_servico" defaultValue={proc.nome_servico} required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="categoria" className="text-white/70">Categoria *</Label>
+                <Label htmlFor="categoria" className="text-foreground/70">Categoria *</Label>
                 <Select name="categoria" defaultValue={proc.categoria || undefined}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione..." />
@@ -111,31 +111,31 @@ export default function EditarProcedimentoPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="codigo_tuss" className="text-white/70">Código TUSS</Label>
+                <Label htmlFor="codigo_tuss" className="text-foreground/70">Código TUSS</Label>
                 <Input id="codigo_tuss" name="codigo_tuss" defaultValue={proc.codigo_tuss ?? ""} placeholder="Ex: 5.01.01.01-0" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="tempo_estimado" className="text-white/70">Tempo Estimado (min)</Label>
+                <Label htmlFor="tempo_estimado" className="text-foreground/70">Tempo Estimado (min)</Label>
                 <Input id="tempo_estimado" name="tempo_estimado" type="number" defaultValue={proc.tempo_estimado_minutos ?? 30} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="preco_venda" className="text-white/70">Preço de Venda (R$) *</Label>
+                <Label htmlFor="preco_venda" className="text-foreground/70">Preço de Venda (R$) *</Label>
                 <Input id="preco_venda" name="preco_venda" type="number" step="0.01" defaultValue={proc.preco_venda} required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="custo_insumos" className="text-white/70">Custo Insumos Diretos (R$)</Label>
+                <Label htmlFor="custo_insumos" className="text-foreground/70">Custo Insumos Diretos (R$)</Label>
                 <Input id="custo_insumos" name="custo_insumos" type="number" step="0.01" defaultValue={proc.custo_insumos_direto ?? 0} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="custo_laboratorio" className="text-white/70">Custo Laboratório (R$)</Label>
+                <Label htmlFor="custo_laboratorio" className="text-foreground/70">Custo Laboratório (R$)</Label>
                 <Input id="custo_laboratorio" name="custo_laboratorio" type="number" step="0.01" defaultValue={proc.custo_laboratorio ?? 0} />
               </div>
             </div>
 
             <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
-              <p className="text-sm font-medium text-white/70 mb-1">Margem de Contribuição</p>
+              <p className="text-sm font-medium text-foreground/70 mb-1">Margem de Contribuição</p>
               <p className="text-3xl font-bold text-emerald-400">{margem}%</p>
-              <p className="text-xs text-white/40 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 Custo total: R$ {custoTotal.toFixed(2)} | Lucro bruto: R$ {(proc.preco_venda - custoTotal).toFixed(2)}
               </p>
             </div>

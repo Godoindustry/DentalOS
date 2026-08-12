@@ -41,8 +41,8 @@ export default function ProcedimentosPage() {
     <PageTransition className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Procedimentos</h1>
-          <p className="text-sm text-white/50">Gerencie os procedimentos e a precificação da clínica</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Procedimentos</h1>
+          <p className="text-sm text-muted-foreground">Gerencie os procedimentos e a precificação da clínica</p>
         </div>
         <Button asChild>
           <Link href="/procedimentos/novo">
@@ -55,7 +55,7 @@ export default function ProcedimentosPage() {
       <Card>
         <CardHeader>
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
             <Input
               placeholder="Buscar procedimento..."
               className="pl-10"
@@ -68,13 +68,13 @@ export default function ProcedimentosPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-white/50">Procedimento</TableHead>
-                <TableHead className="text-white/50">Categoria</TableHead>
-                <TableHead className="text-white/50">Preço Venda</TableHead>
-                <TableHead className="text-white/50">Custo Total</TableHead>
-                <TableHead className="text-white/50">Margem</TableHead>
-                <TableHead className="text-white/50">Tempo</TableHead>
-                <TableHead className="text-right text-white/50">Ações</TableHead>
+                <TableHead className="text-muted-foreground">Procedimento</TableHead>
+                <TableHead className="text-muted-foreground">Categoria</TableHead>
+                <TableHead className="text-muted-foreground">Preço Venda</TableHead>
+                <TableHead className="text-muted-foreground">Custo Total</TableHead>
+                <TableHead className="text-muted-foreground">Margem</TableHead>
+                <TableHead className="text-muted-foreground">Tempo</TableHead>
+                <TableHead className="text-right text-muted-foreground">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -88,7 +88,7 @@ export default function ProcedimentosPage() {
                 ))
               ) : filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12 text-white/40">
+                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
                     {search ? "Nenhum procedimento encontrado para esta busca" : "Nenhum procedimento cadastrado ainda"}
                   </TableCell>
                 </TableRow>
@@ -99,22 +99,22 @@ export default function ProcedimentosPage() {
                     ? ((proc.preco_venda - custoTotal) / proc.preco_venda * 100).toFixed(0)
                     : "0"
                   return (
-                    <TableRow key={proc.id} className="hover:bg-white/[0.03] border-white/[0.06]">
+                    <TableRow key={proc.id} className="hover:bg-card border-border">
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
                             <Syringe className="h-4 w-4 text-primary" />
                           </div>
-                          <span className="font-medium text-white">{proc.nome_servico}</span>
+                          <span className="font-medium text-foreground">{proc.nome_servico}</span>
                         </div>
                       </TableCell>
                       <TableCell><Badge variant="secondary">{proc.categoria}</Badge></TableCell>
-                      <TableCell className="text-white/80">{formatCurrency(proc.preco_venda)}</TableCell>
-                      <TableCell className="text-white/60">{formatCurrency(custoTotal)}</TableCell>
+                      <TableCell className="text-foreground">{formatCurrency(proc.preco_venda)}</TableCell>
+                      <TableCell className="text-muted-foreground">{formatCurrency(custoTotal)}</TableCell>
                       <TableCell>
                         <span className="font-semibold text-emerald-400">{margem}%</span>
                       </TableCell>
-                      <TableCell className="text-white/60">{proc.tempo_estimado_minutos}min</TableCell>
+                      <TableCell className="text-muted-foreground">{proc.tempo_estimado_minutos}min</TableCell>
                       <TableCell className="text-right">
                         <Button variant="ghost" size="sm" asChild>
                           <Link href={`/procedimentos/${proc.id}`}>Editar</Link>

@@ -18,7 +18,7 @@ export default function OdontogramaPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
           <div className="flex items-center gap-4">
             <Avatar className="w-14 h-14 border-2 border-white shadow-sm ring-2 ring-teal-500/20">
-              <AvatarFallback className="bg-gradient-to-br from-teal-400 to-teal-600 text-white font-bold text-lg">
+              <AvatarFallback className="bg-gradient-to-br from-teal-400 to-teal-600 text-foreground font-bold text-lg">
                 JM
               </AvatarFallback>
             </Avatar>

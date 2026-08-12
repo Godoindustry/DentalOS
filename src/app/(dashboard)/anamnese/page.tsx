@@ -55,8 +55,8 @@ export default function AnamnesePage() {
     <PageTransition className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Anamnese</h1>
-          <p className="text-sm text-white/50">Prontuário clínico e fichas de anamnese</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Anamnese</h1>
+          <p className="text-sm text-muted-foreground">Prontuário clínico e fichas de anamnese</p>
         </div>
         <Button asChild>
           <Link href="/anamnese/nova">
@@ -68,13 +68,13 @@ export default function AnamnesePage() {
 
       <div className="grid gap-4 md:grid-cols-3">
         {[
-          { titulo: "Total de Anamneses", valor: anamneses.length, cor: "text-white" },
+          { titulo: "Total de Anamneses", valor: anamneses.length, cor: "text-foreground" },
           { titulo: "Finalizadas", valor: finalizadas, cor: "text-emerald-400" },
           { titulo: "Pendentes", valor: pendentes, cor: "text-amber-400" },
         ].map((item) => (
           <Card key={item.titulo}>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-white/70">{item.titulo}</CardTitle>
+              <CardTitle className="text-sm font-medium text-foreground/70">{item.titulo}</CardTitle>
             </CardHeader>
             <CardContent>
               {loading ? (
@@ -82,7 +82,7 @@ export default function AnamnesePage() {
               ) : (
                 <>
                   <span className={`text-2xl font-bold ${item.cor}`}>{item.valor}</span>
-                  <p className="text-xs text-white/40 mt-1">Registros no sistema</p>
+                  <p className="text-xs text-muted-foreground mt-1">Registros no sistema</p>
                 </>
               )}
             </CardContent>
@@ -93,7 +93,7 @@ export default function AnamnesePage() {
       <Card>
         <CardHeader>
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
             <Input
               placeholder="Buscar por paciente..."
               className="pl-10"
@@ -106,11 +106,11 @@ export default function AnamnesePage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-white/50">Paciente</TableHead>
-                <TableHead className="text-white/50">Data</TableHead>
-                <TableHead className="text-white/50">Profissional</TableHead>
-                <TableHead className="text-white/50">Status</TableHead>
-                <TableHead className="text-right text-white/50">Ações</TableHead>
+                <TableHead className="text-muted-foreground">Paciente</TableHead>
+                <TableHead className="text-muted-foreground">Data</TableHead>
+                <TableHead className="text-muted-foreground">Profissional</TableHead>
+                <TableHead className="text-muted-foreground">Status</TableHead>
+                <TableHead className="text-right text-muted-foreground">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -124,27 +124,27 @@ export default function AnamnesePage() {
                 ))
               ) : filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-12 text-white/40">
+                  <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
                     {search ? "Nenhuma anamnese encontrada para esta busca" : "Nenhuma anamnese registrada ainda"}
                   </TableCell>
                 </TableRow>
               ) : (
                 filtered.map((ana) => (
-                  <TableRow key={ana.id} className="hover:bg-white/[0.03] border-white/[0.06]">
+                  <TableRow key={ana.id} className="hover:bg-card border-border">
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
                           <FileText className="h-4 w-4 text-primary" />
                         </div>
-                        <span className="font-medium text-white">{(ana as any).pacientes?.nome ?? "—"}</span>
+                        <span className="font-medium text-foreground">{(ana as any).pacientes?.nome ?? "—"}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-white/60">
+                    <TableCell className="text-muted-foreground">
                       {ana.finalizado_em
                         ? new Date(ana.finalizado_em).toLocaleDateString("pt-BR")
                         : "—"}
                     </TableCell>
-                    <TableCell className="text-white/60">{(ana as any).profissionais?.nome ?? "—"}</TableCell>
+                    <TableCell className="text-muted-foreground">{(ana as any).profissionais?.nome ?? "—"}</TableCell>
                     <TableCell>
                       <Badge variant="success">Finalizado</Badge>
                     </TableCell>

@@ -110,7 +110,7 @@ export function DerecSingleTooth() {
 
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-white">Dental <span className="text-teal-400">— Dente {dente.numero}</span></h2>
+          <h2 className="text-lg font-bold text-foreground">Dental <span className="text-teal-400">— Dente {dente.numero}</span></h2>
           <div className="flex items-center gap-4 text-xs font-semibold uppercase tracking-wide">
             <ActionButton icon={<RotateCcw className="w-3.5 h-3.5" />} label="Reset" onClick={() => resetDente(dente.numero)} />
             <ActionButton icon={<CircleOff className="w-3.5 h-3.5" />} label="Missing" onClick={handleMissing} />

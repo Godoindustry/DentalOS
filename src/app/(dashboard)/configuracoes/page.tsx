@@ -88,8 +88,8 @@ export default function ConfiguracoesPage() {
   return (
     <PageTransition className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-white">Configurações</h1>
-        <p className="text-sm text-white/50">Gerencie as configurações da sua clínica</p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Configurações</h1>
+        <p className="text-sm text-muted-foreground">Gerencie as configurações da sua clínica</p>
       </div>
 
       <Tabs defaultValue="clinica">
@@ -145,19 +145,19 @@ export default function ConfiguracoesPage() {
                     )}
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-2">
-                        <Label htmlFor="nome" className="text-white/70">Nome exibido</Label>
+                        <Label htmlFor="nome" className="text-foreground/70">Nome exibido</Label>
                         <Input id="nome" name="nome" defaultValue={perfil?.nome ?? ""} required />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="especialidade" className="text-white/70">Especialidade</Label>
+                        <Label htmlFor="especialidade" className="text-foreground/70">Especialidade</Label>
                         <Input id="especialidade" name="especialidade" defaultValue={perfil?.especialidade ?? ""} />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="cro" className="text-white/70">CRO</Label>
+                        <Label htmlFor="cro" className="text-foreground/70">CRO</Label>
                         <Input id="cro" name="cro" defaultValue={perfil?.cro ?? ""} />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="uf_cro" className="text-white/70">UF do CRO</Label>
+                        <Label htmlFor="uf_cro" className="text-foreground/70">UF do CRO</Label>
                         <Input id="uf_cro" name="uf_cro" defaultValue={perfil?.uf_cro ?? ""} maxLength={2} />
                       </div>
                     </div>
@@ -200,7 +200,7 @@ export default function ConfiguracoesPage() {
                     )}
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-2">
-                        <Label htmlFor="nome_fantasia" className="text-white/70">Nome Fantasia</Label>
+                        <Label htmlFor="nome_fantasia" className="text-foreground/70">Nome Fantasia</Label>
                         <Input
                           id="nome_fantasia"
                           name="nome_fantasia"
@@ -209,7 +209,7 @@ export default function ConfiguracoesPage() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="razao_social" className="text-white/70">Razão Social</Label>
+                        <Label htmlFor="razao_social" className="text-foreground/70">Razão Social</Label>
                         <Input
                           id="razao_social"
                           name="razao_social"
@@ -217,7 +217,7 @@ export default function ConfiguracoesPage() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="cnpj" className="text-white/70">CNPJ</Label>
+                        <Label htmlFor="cnpj" className="text-foreground/70">CNPJ</Label>
                         <Input
                           id="cnpj"
                           name="cnpj"
@@ -226,7 +226,7 @@ export default function ConfiguracoesPage() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="plano" className="text-white/70">Plano de Assinatura</Label>
+                        <Label htmlFor="plano" className="text-foreground/70">Plano de Assinatura</Label>
                         <Input
                           id="plano"
                           defaultValue={clinica?.plano_assinatura === "pro" ? "Profissional" : clinica?.plano_assinatura === "premium" ? "Premium" : "Básico"}
@@ -274,46 +274,46 @@ export default function ConfiguracoesPage() {
                     )}
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-2">
-                        <Label htmlFor="nome_clinica" className="text-white/70">Nome da clínica (usado pelo bot)</Label>
+                        <Label htmlFor="nome_clinica" className="text-foreground/70">Nome da clínica (usado pelo bot)</Label>
                         <Input id="nome_clinica" name="nome_clinica" defaultValue={configBot?.nome_clinica ?? ""} />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="telefone" className="text-white/70">Telefone da clínica</Label>
+                        <Label htmlFor="telefone" className="text-foreground/70">Telefone da clínica</Label>
                         <Input id="telefone" name="telefone" defaultValue={configBot?.telefone ?? ""} placeholder="(11) 0000-0000" />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="whatsapp" className="text-white/70">Número WhatsApp (Z-API)</Label>
+                        <Label htmlFor="whatsapp" className="text-foreground/70">Número WhatsApp (Z-API)</Label>
                         <Input id="whatsapp" name="whatsapp" defaultValue={configBot?.whatsapp ?? ""} placeholder="(11) 90000-0000" />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="horario_funcionamento" className="text-white/70">Horário de funcionamento</Label>
+                        <Label htmlFor="horario_funcionamento" className="text-foreground/70">Horário de funcionamento</Label>
                         <Input id="horario_funcionamento" name="horario_funcionamento" defaultValue={configBot?.horario_funcionamento ?? ""} placeholder="seg a sex 08:00-18:00" />
                       </div>
                       <div className="space-y-2 md:col-span-2">
-                        <Label htmlFor="n8n_webhook_url" className="text-white/70">Webhook n8n</Label>
+                        <Label htmlFor="n8n_webhook_url" className="text-foreground/70">Webhook n8n</Label>
                         <Input id="n8n_webhook_url" name="n8n_webhook_url" defaultValue={configBot?.n8n_webhook_url ?? ""} placeholder="https://n8n.seudominio.com/webhook/odontolab-bot" />
-                        <p className="text-xs text-white/40">
+                        <p className="text-xs text-muted-foreground">
                           Cole aqui a URL do webhook do seu fluxo n8n. Quando salvar, a Z-API será automaticamente configurada para enviar mensagens recebidas para esse endereço.
                         </p>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="n8n_webhook_secret" className="text-white/70">Segredo do Webhook n8n</Label>
+                        <Label htmlFor="n8n_webhook_secret" className="text-foreground/70">Segredo do Webhook n8n</Label>
                         <Input id="n8n_webhook_secret" name="n8n_webhook_secret" type="password" defaultValue={configBot?.n8n_webhook_secret ?? ""} placeholder="Segredo para validar assinatura HMAC" />
-                        <p className="text-xs text-white/40">
+                        <p className="text-xs text-muted-foreground">
                           Use o mesmo segredo configurado no n8n para validar que as requisições são legítimas.
                         </p>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="ia_model" className="text-white/70">Modelo de IA</Label>
+                        <Label htmlFor="ia_model" className="text-foreground/70">Modelo de IA</Label>
                         <Input id="ia_model" name="ia_model" defaultValue={configBot?.ia_model ?? "llama-3.1-8b-instant"} placeholder="llama-3.1-8b-instant" />
                       </div>
                     </div>
 
-                    <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-2">
+                    <div className="rounded-xl border border-border bg-card p-4 space-y-2">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-white">Conexão com Google Calendar</p>
-                          <p className="text-xs text-white/40">
+                          <p className="text-sm font-medium text-foreground">Conexão com Google Calendar</p>
+                          <p className="text-xs text-muted-foreground">
                             {configBot?.google_refresh_token
                               ? "Conectado — novos agendamentos são criados automaticamente na agenda acima."
                               : "Não conectado. Sem isso, os agendamentos não são sincronizados com o Google Calendar."}
@@ -336,33 +336,33 @@ export default function ConfiguracoesPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="mensagem_boas_vindas" className="text-white/70">Mensagem de boas-vindas</Label>
+                      <Label htmlFor="mensagem_boas_vindas" className="text-foreground/70">Mensagem de boas-vindas</Label>
                       <textarea
                         id="mensagem_boas_vindas"
                         name="mensagem_boas_vindas"
                         defaultValue={configBot?.mensagem_boas_vindas ?? ""}
                         rows={2}
-                        className="flex w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
+                        className="flex w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="mensagem_urgencia" className="text-white/70">Mensagem para casos de urgência</Label>
+                      <Label htmlFor="mensagem_urgencia" className="text-foreground/70">Mensagem para casos de urgência</Label>
                       <textarea
                         id="mensagem_urgencia"
                         name="mensagem_urgencia"
                         defaultValue={configBot?.mensagem_urgencia ?? ""}
                         rows={2}
-                        className="flex w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
+                        className="flex w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="transferencia_humano" className="text-white/70">Mensagem de transferência para atendimento humano</Label>
+                      <Label htmlFor="transferencia_humano" className="text-foreground/70">Mensagem de transferência para atendimento humano</Label>
                       <textarea
                         id="transferencia_humano"
                         name="transferencia_humano"
                         defaultValue={configBot?.transferencia_humano ?? ""}
                         rows={2}
-                        className="flex w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
+                        className="flex w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
                       />
                     </div>
                     <input
@@ -370,36 +370,36 @@ export default function ConfiguracoesPage() {
                       name="webhook_slug"
                       value={configBot?.webhook_slug || ""}
                     />
-                    <label className="flex items-center gap-2 text-sm text-white/70">
+                    <label className="flex items-center gap-2 text-sm text-foreground/70">
                       <input
                         type="checkbox"
                         name="ativo"
                         value="true"
                         defaultChecked={configBot?.ativo ?? true}
-                        className="h-4 w-4 rounded border-white/20 bg-white/5"
+                        className="h-4 w-4 rounded border-border bg-card"
                       />
                       Bot ativo
                     </label>
 
                     {configBot?.webhook_slug && (
-                      <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-2">
-                        <p className="text-xs font-bold text-white/60 uppercase tracking-wider">URL do seu Webhook n8n</p>
-                        <p className="text-xs text-white/40">
+                      <div className="rounded-xl border border-border bg-card p-4 space-y-2">
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">URL do seu Webhook n8n</p>
+                        <p className="text-xs text-muted-foreground">
                           Use esta URL no n8n como endpoint do webhook:
                         </p>
                         <code className="block w-full break-all rounded-lg bg-black/30 px-3 py-2 text-xs text-primary">
                           {origin}/api/bot/n8n/{configBot.webhook_slug}
                         </code>
-                        <p className="text-[11px] text-white/30">
+                        <p className="text-[11px] text-muted-foreground/70">
                           Não compartilhe essa URL publicamente. Use o segredo abaixo para validar as requisições.
                         </p>
                       </div>
                     )}
 
-                    <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-2">
-                      <p className="text-xs font-bold text-white/60 uppercase tracking-wider">Testar envio de mensagem</p>
-                      <p className="text-xs text-white/40">
-                        Envie uma mensagem de teste para <strong className="text-white/70">{configBot?.whatsapp || "+55 11 966230438"}</strong> para verificar se a Z-API está conectada.
+                    <div className="rounded-xl border border-border bg-card p-4 space-y-2">
+                      <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Testar envio de mensagem</p>
+                      <p className="text-xs text-muted-foreground">
+                        Envie uma mensagem de teste para <strong className="text-foreground/70">{configBot?.whatsapp || "+55 11 966230438"}</strong> para verificar se a Z-API está conectada.
                       </p>
                       <TestBotButton whatsapp={configBot?.whatsapp} />
                     </div>
@@ -423,7 +423,7 @@ export default function ConfiguracoesPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-white/50">
+              <p className="text-sm text-muted-foreground">
                 Em breve: políticas RLS, logs de auditoria e MFA.
               </p>
             </CardContent>
@@ -439,7 +439,7 @@ export default function ConfiguracoesPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-white/50">
+              <p className="text-sm text-muted-foreground">
                 Em breve: tema claro/escuro e customização de marca.
               </p>
             </CardContent>

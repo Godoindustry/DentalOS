@@ -57,7 +57,7 @@ export function DerecTimelineTrigger() {
               ))}
             </div>
 
-            <div className="flex items-center justify-center gap-4 px-5 py-4 bg-slate-950 text-white">
+            <div className="flex items-center justify-center gap-4 px-5 py-4 bg-slate-950 text-foreground">
               <button
                 onClick={() => setSelected((s) => Math.min(dates.length - 1, s + 1))}
                 className="p-1 hover:bg-slate-800 rounded-full"

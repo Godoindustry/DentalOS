@@ -344,15 +344,15 @@ export function Odontograma() {
         {estadosCiclo.map((estado) => {
           const config = estadoConfig[estado]
           return (
-            <div key={estado} className="flex items-center gap-2 bg-white/5 px-2 py-1 rounded-md">
+            <div key={estado} className="flex items-center gap-2 bg-card px-2 py-1 rounded-md">
               <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: config.cor }} />
-              <span className="text-xs font-medium text-white/80">{config.label}</span>
+              <span className="text-xs font-medium text-foreground">{config.label}</span>
             </div>
           )
         })}
       </div>
 
-      <div className="rounded-xl border border-white/[0.08] p-4 sm:p-8 overflow-hidden shadow-2xl" style={{ background: "linear-gradient(160deg, #8FA8B4 0%, #7D99A6 50%, #6F8D9A 100%)" }}>
+      <div className="rounded-xl border border-border p-4 sm:p-8 overflow-hidden shadow-2xl" style={{ background: "linear-gradient(160deg, #8FA8B4 0%, #7D99A6 50%, #6F8D9A 100%)" }}>
         <div className="relative w-full mx-auto" style={{ maxWidth: 500, aspectRatio: "1 / 1" }}>
           <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
@@ -371,10 +371,10 @@ export function Odontograma() {
             <path d="M 5 55 C 8 85, 92 85, 95 55 C 92 70, 50 78, 50 78 C 50 78, 8 70, 5 55 Z" fill="url(#gum-lower-grad)" opacity="0.85" />
           </svg>
 
-          <p className="absolute -top-4 left-1/2 -translate-x-1/2 text-[11px] font-bold text-white/50 tracking-widest uppercase z-10">
+          <p className="absolute -top-4 left-1/2 -translate-x-1/2 text-[11px] font-bold text-muted-foreground tracking-widest uppercase z-10">
             Superior
           </p>
-          <p className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[11px] font-bold text-white/50 tracking-widest uppercase z-10">
+          <p className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[11px] font-bold text-muted-foreground tracking-widest uppercase z-10">
             Inferior
           </p>
 
@@ -402,12 +402,12 @@ export function Odontograma() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="rounded-xl border border-white/10 bg-white/[0.04] backdrop-blur-md p-4"
+            className="rounded-xl border border-border bg-card backdrop-blur-md p-4"
           >
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-medium text-white">
+              <p className="text-sm font-medium text-foreground">
                 Dente {denteSelecionado}
-                <span className="text-white/50 ml-2">
+                <span className="text-muted-foreground ml-2">
                   {estadoConfig[denteAtual.estado].label}
                 </span>
               </p>
@@ -426,7 +426,7 @@ export function Odontograma() {
                       "rounded-lg px-3 py-1.5 text-xs font-medium transition-all border",
                       isActive
                         ? "border-primary/50 bg-primary/20 text-primary shadow-sm"
-                        : "border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white",
+                        : "border-border bg-card text-muted-foreground hover:bg-card hover:text-foreground",
                     )}
                   >
                     {config.label}

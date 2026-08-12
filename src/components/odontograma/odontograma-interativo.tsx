@@ -309,7 +309,7 @@ export function OdontogramaInterativo() {
       <div className="flex justify-center gap-4">
         <button
           onClick={() => setAberta(!aberta)}
-          className="rounded-full bg-blue-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-500/30 hover:bg-blue-500 transition-all flex items-center gap-2"
+          className="rounded-full bg-blue-600 px-6 py-2.5 text-sm font-bold text-foreground shadow-lg shadow-blue-500/30 hover:bg-blue-500 transition-all flex items-center gap-2"
         >
           {aberta ? "🦷 Fechar Boca" : "😮 Abrir Boca (3D)"}
         </button>
@@ -329,7 +329,7 @@ export function OdontogramaInterativo() {
           boxShadow: "inset 0 0 100px rgba(0,0,0,0.5)"
         }}
       >
-        <p className="absolute top-4 left-1/2 -translate-x-1/2 text-xs font-bold text-white/50 tracking-[0.2em]">
+        <p className="absolute top-4 left-1/2 -translate-x-1/2 text-xs font-bold text-muted-foreground tracking-[0.2em]">
           SUPERIOR
         </p>
 
@@ -374,7 +374,7 @@ export function OdontogramaInterativo() {
 
         </div>
 
-        <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs font-bold text-white/50 tracking-[0.2em] pointer-events-none">
+        <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs font-bold text-muted-foreground tracking-[0.2em] pointer-events-none">
           INFERIOR
         </p>
       </div>

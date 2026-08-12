@@ -119,7 +119,7 @@ export default function PotencialDetalhe() {
   if (!potencial) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-white/40">Potencial paciente não encontrado</p>
+        <p className="text-muted-foreground">Potencial paciente não encontrado</p>
       </div>
     )
   }
@@ -140,12 +140,12 @@ export default function PotencialDetalhe() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
               <MessageCircle className="h-5 w-5 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-white">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
               {potencial.nome || "Anônimo"}
             </h1>
             <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
           </div>
-          <p className="text-sm text-white/50">
+          <p className="text-sm text-muted-foreground">
             {potencial.canal === "whatsapp" ? "Contato via WhatsApp" : "Contato via Telegram"} · {new Date(potencial.created_at).toLocaleDateString("pt-BR")}
             {potencial.total_conversas > 0 && <> · {potencial.total_conversas} mensagens</>}
           </p>
@@ -217,15 +217,15 @@ export default function PotencialDetalhe() {
         </CardHeader>
         <CardContent>
           {Object.keys(anamnese).length === 0 ? (
-            <p className="text-white/40 text-sm">Nenhuma informação de anamnese coletada</p>
+            <p className="text-muted-foreground text-sm">Nenhuma informação de anamnese coletada</p>
           ) : (
             <div className="grid gap-3 md:grid-cols-2">
               {Object.entries(anamnese).map(([key, value]) => (
                 <div key={key} className="space-y-1">
-                  <p className="text-xs text-white/40 capitalize">
+                  <p className="text-xs text-muted-foreground capitalize">
                     {key.replace(/_/g, " ")}
                   </p>
-                  <p className="text-sm text-white bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2">
+                  <p className="text-sm text-foreground bg-card border border-border rounded-lg px-3 py-2">
                     {String(value)}
                   </p>
                 </div>
@@ -247,24 +247,24 @@ export default function PotencialDetalhe() {
             <div className="grid gap-3 md:grid-cols-3">
               {potencial.queixa_principal && (
                 <div className="space-y-1">
-                  <p className="text-xs text-white/40">Queixa Principal</p>
-                  <p className="text-sm text-white bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2">
+                  <p className="text-xs text-muted-foreground">Queixa Principal</p>
+                  <p className="text-sm text-foreground bg-card border border-border rounded-lg px-3 py-2">
                     {potencial.queixa_principal}
                   </p>
                 </div>
               )}
               {potencial.regiao_dente && (
                 <div className="space-y-1">
-                  <p className="text-xs text-white/40">Região / Dente</p>
-                  <p className="text-sm text-white bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2">
+                  <p className="text-xs text-muted-foreground">Região / Dente</p>
+                  <p className="text-sm text-foreground bg-card border border-border rounded-lg px-3 py-2">
                     {potencial.regiao_dente}
                   </p>
                 </div>
               )}
               {potencial.urgencia && (
                 <div className="space-y-1">
-                  <p className="text-xs text-white/40">Nível de Urgência</p>
-                  <p className="text-sm text-white bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2">
+                  <p className="text-xs text-muted-foreground">Nível de Urgência</p>
+                  <p className="text-sm text-foreground bg-card border border-border rounded-lg px-3 py-2">
                     {potencial.urgencia === "alta" ? "🔴 Alta" : potencial.urgencia === "media" ? "🟡 Média" : potencial.urgencia === "baixa" ? "🟢 Baixa" : potencial.urgencia}
                   </p>
                 </div>
@@ -287,7 +287,7 @@ export default function PotencialDetalhe() {
               {[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}
             </div>
           ) : conversas.length === 0 ? (
-            <p className="text-white/40 text-sm">Nenhuma conversa registrada</p>
+            <p className="text-muted-foreground text-sm">Nenhuma conversa registrada</p>
           ) : (
             <div className="space-y-3 max-h-[500px] overflow-y-auto">
               {conversas.map((c) => (
@@ -298,10 +298,10 @@ export default function PotencialDetalhe() {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium text-white/60">Paciente</span>
-                        <span className="text-[10px] text-white/30">{new Date(c.created_at).toLocaleString("pt-BR")}</span>
+                        <span className="text-xs font-medium text-muted-foreground">Paciente</span>
+                        <span className="text-[10px] text-muted-foreground/70">{new Date(c.created_at).toLocaleString("pt-BR")}</span>
                       </div>
-                      <p className="text-sm text-white/80 bg-white/[0.03] rounded-lg px-3 py-2 border border-white/[0.06]">
+                      <p className="text-sm text-foreground bg-card rounded-lg px-3 py-2 border border-border">
                         {c.mensagem_usuario}
                       </p>
                     </div>
@@ -320,7 +320,7 @@ export default function PotencialDetalhe() {
                             </Badge>
                           )}
                         </div>
-                        <p className="text-sm text-white/80 bg-emerald-500/[0.04] rounded-lg px-3 py-2 border border-emerald-500/10">
+                        <p className="text-sm text-foreground bg-emerald-500/[0.04] rounded-lg px-3 py-2 border border-emerald-500/10">
                           {c.resposta_bot}
                         </p>
                       </div>
@@ -342,11 +342,11 @@ export default function PotencialDetalhe() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-white/70 bg-white/[0.03] border border-white/[0.06] rounded-lg p-3">
+            <p className="text-sm text-foreground/70 bg-card border border-border rounded-lg p-3">
               {potencial.ultima_mensagem}
             </p>
             {potencial.ultima_interacao && (
-              <p className="text-xs text-white/40 mt-2">
+              <p className="text-xs text-muted-foreground mt-2">
                 {new Date(potencial.ultima_interacao).toLocaleString("pt-BR")}
               </p>
             )}

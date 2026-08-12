@@ -47,8 +47,8 @@ export function DonutChart({ data, total }: DonutChartProps) {
         </PieChart>
       </ResponsiveContainer>
       <div className="absolute flex flex-col items-center justify-center">
-        <span className="text-2xl font-bold text-white">{total}</span>
-        <span className="text-xs text-white/40">Bruto</span>
+        <span className="text-2xl font-bold text-foreground">{total}</span>
+        <span className="text-xs text-muted-foreground">Bruto</span>
       </div>
     </div>
   )

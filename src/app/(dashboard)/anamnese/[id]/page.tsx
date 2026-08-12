@@ -78,7 +78,7 @@ export default function AnamneseDetalhe() {
   if (!anamnese) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-white/40">Anamnese não encontrada</p>
+        <p className="text-muted-foreground">Anamnese não encontrada</p>
       </div>
     )
   }
@@ -95,10 +95,10 @@ export default function AnamneseDetalhe() {
         </Button>
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-white">Anamnese</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Anamnese</h1>
             <Badge variant="success">Finalizado</Badge>
           </div>
-          <p className="text-sm text-white/50">
+          <p className="text-sm text-muted-foreground">
             {(anamnese as any).pacientes?.nome} &middot;{" "}
             {anamnese.finalizado_em
               ? new Date(anamnese.finalizado_em).toLocaleDateString("pt-BR")
@@ -119,8 +119,8 @@ export default function AnamneseDetalhe() {
                 <item.icon className="h-4 w-4 text-primary" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs text-white/40">{item.label}</p>
-                <p className="text-sm font-medium text-white truncate">{item.value}</p>
+                <p className="text-xs text-muted-foreground">{item.label}</p>
+                <p className="text-sm font-medium text-foreground truncate">{item.value}</p>
               </div>
             </CardContent>
           </Card>
@@ -144,21 +144,21 @@ export default function AnamneseDetalhe() {
               return (
                 <div
                   key={key}
-                  className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] p-3"
+                  className="flex items-center justify-between rounded-xl border border-border bg-card p-3"
                 >
-                  <p className="text-sm text-white/70">{label}</p>
+                  <p className="text-sm text-foreground/70">{label}</p>
                   {isSim ? (
                     <Badge variant={val === "sim" ? (key.startsWith("qual") ? "default" : "warning") : "secondary"}>
                       {val === "sim" ? "Sim" : "Não"}
                     </Badge>
                   ) : (
-                    <span className="text-sm font-medium text-white">{val}</span>
+                    <span className="text-sm font-medium text-foreground">{val}</span>
                   )}
                 </div>
               )
             })}
             {Object.keys(questoes).length === 0 && (
-              <p className="text-sm text-white/40 text-center py-8">Nenhuma resposta registrada</p>
+              <p className="text-sm text-muted-foreground text-center py-8">Nenhuma resposta registrada</p>
             )}
           </div>
         </CardContent>

@@ -142,7 +142,7 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#002B36] text-white overflow-hidden selection:bg-primary/30 selection:text-white">
+    <div className="dark min-h-screen bg-[#002B36] text-white overflow-hidden selection:bg-primary/30 selection:text-white">
       {/* ── NAVBAR ── */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-[#002B36]/90 backdrop-blur-xl border-b border-white/[0.06]" : "bg-transparent"}`}>
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">

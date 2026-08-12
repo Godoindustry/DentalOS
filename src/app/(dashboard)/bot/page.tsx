@@ -39,7 +39,7 @@ const statusConfig: Record<string, { label: string; color: string; bg: string; b
   agendou: { label: "Agendou", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
   convertido: { label: "Convertido", color: "text-sky-400", bg: "bg-sky-500/10", border: "border-sky-500/20" },
   desistiu: { label: "Desistiu", color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20" },
-  inativo: { label: "Inativo", color: "text-white/40", bg: "bg-white/5", border: "border-white/10" },
+  inativo: { label: "Inativo", color: "text-muted-foreground", bg: "bg-card", border: "border-border" },
 }
 
 const canalLabel: Record<string, string> = {
@@ -58,10 +58,10 @@ function KpiCard({ title, value, icon: Icon, loading, color }: {
 }) {
   return (
     <motion.div variants={itemVariants}>
-      <Card className="group relative overflow-hidden transition-all duration-300 hover:border-white/[0.15]">
+      <Card className="group relative overflow-hidden transition-all duration-300 hover:border-border">
         <div className="absolute inset-x-0 top-0 h-0.5" style={{ background: color }} />
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-white/60">{title}</CardTitle>
+          <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
           <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: `${color}15` }}>
             <Icon className="h-4 w-4" style={{ color }} />
           </div>
@@ -70,7 +70,7 @@ function KpiCard({ title, value, icon: Icon, loading, color }: {
           {loading ? (
             <Skeleton className="h-8 w-20" />
           ) : (
-            <div className="text-2xl font-bold tracking-tight text-white">{value}</div>
+            <div className="text-2xl font-bold tracking-tight text-foreground">{value}</div>
           )}
         </CardContent>
       </Card>
@@ -115,8 +115,8 @@ export default function BotPage() {
     <PageTransition className="space-y-6">
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Assistente Virtual</h1>
-          <p className="text-sm text-white/50">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Assistente Virtual</h1>
+          <p className="text-sm text-muted-foreground">
             Acompanhe os atendimentos do bot Telegram e gerencie os leads
           </p>
         </div>
@@ -153,11 +153,11 @@ export default function BotPage() {
                   ))}
                 </div>
               ) : recentes.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-[300px] text-white/30">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/[0.04] mb-4">
+                <div className="flex flex-col items-center justify-center h-[300px] text-muted-foreground/70">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-card mb-4">
                     <Bot className="h-6 w-6" />
                   </div>
-                  <p className="text-sm font-medium text-white/50">Nenhuma conversa ainda</p>
+                  <p className="text-sm font-medium text-muted-foreground">Nenhuma conversa ainda</p>
                   <p className="text-xs mt-1">As conversas do bot Telegram aparecerão aqui</p>
                 </div>
               ) : (
@@ -168,18 +168,18 @@ export default function BotPage() {
                       <Link
                         key={p.id}
                         href={`/pacientes-potenciais/${p.id}`}
-                        className="group flex items-center gap-3 rounded-xl border border-white/[0.05] bg-white/[0.02] p-3 transition-all duration-200 hover:border-white/[0.12] hover:bg-white/[0.04]"
+                        className="group flex items-center gap-3 rounded-xl border border-border bg-card p-3 transition-all duration-200 hover:border-border hover:bg-card"
                       >
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
                           <User className="h-4 w-4 text-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <p className="text-sm font-medium text-white/90 truncate group-hover:text-white">
+                            <p className="text-sm font-medium text-foreground truncate group-hover:text-foreground">
                               {p.nome || "Anônimo"}
                             </p>
                             {p.canal && canalLabel[p.canal] && (
-                              <span className="text-[10px] uppercase tracking-wider text-white/30 font-medium">
+                              <span className="text-[10px] uppercase tracking-wider text-muted-foreground/70 font-medium">
                                 {canalLabel[p.canal]}
                               </span>
                             )}
@@ -193,36 +193,36 @@ export default function BotPage() {
                             <span className={`text-xs ${cfg.color}`}>{cfg.label}</span>
                             {p.etapa_atual && (
                               <>
-                                <span className="text-white/20">·</span>
-                                <span className="text-xs text-white/40">{p.etapa_atual.replace(/_/g, " ")}</span>
+                                <span className="text-muted-foreground/60">·</span>
+                                <span className="text-xs text-muted-foreground">{p.etapa_atual.replace(/_/g, " ")}</span>
                               </>
                             )}
                             {p.telefone && (
                               <>
-                                <span className="text-white/20">·</span>
-                                <span className="text-xs text-white/40">{p.telefone}</span>
+                                <span className="text-muted-foreground/60">·</span>
+                                <span className="text-xs text-muted-foreground">{p.telefone}</span>
                               </>
                             )}
                           </div>
                           {p.ultima_mensagem && (
-                            <p className="text-xs text-white/30 mt-1 truncate max-w-md">
+                            <p className="text-xs text-muted-foreground/70 mt-1 truncate max-w-md">
                               "{p.ultima_mensagem}"
                             </p>
                           )}
                         </div>
                         <div className="text-right shrink-0">
-                          <p className="text-xs text-white/40">
+                          <p className="text-xs text-muted-foreground">
                             {p.ultima_interacao
                               ? new Date(p.ultima_interacao).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })
                               : "–"}
                           </p>
-                          <p className="text-[11px] text-white/25">
+                          <p className="text-[11px] text-muted-foreground/70">
                             {p.ultima_interacao
                               ? new Date(p.ultima_interacao).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
                               : ""}
                           </p>
                         </div>
-                        <ArrowRight className="h-4 w-4 text-white/20 group-hover:text-white/60 transition-colors shrink-0" />
+                        <ArrowRight className="h-4 w-4 text-muted-foreground/60 group-hover:text-muted-foreground transition-colors shrink-0" />
                       </Link>
                     )
                   })}
@@ -254,14 +254,14 @@ export default function BotPage() {
                     const total = stats.totalLeads || 1
                     const pct = ((count / total) * 100).toFixed(0)
                     return (
-                      <div key={key} className="flex items-center justify-between rounded-lg border border-white/[0.05] px-3 py-2">
+                      <div key={key} className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
                         <div className="flex items-center gap-2">
                           <div className={`h-2.5 w-2.5 rounded-full ${cfg.bg}`} style={{ background: cfg.color.replace("text-", "").replace("amber", "#FBBF77").replace("emerald", "#6EE7B7").replace("sky", "#7DD3FC").replace("red", "#FCA5A5").replace("white", "rgba(255,255,255,0.4)") }} />
-                          <span className="text-sm text-white/70">{cfg.label}</span>
+                          <span className="text-sm text-foreground/70">{cfg.label}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-white">{count}</span>
-                          <span className="text-xs text-white/30">{pct}%</span>
+                          <span className="text-sm font-medium text-foreground">{count}</span>
+                          <span className="text-xs text-muted-foreground/70">{pct}%</span>
                         </div>
                       </div>
                     )
@@ -282,9 +282,9 @@ export default function BotPage() {
               <CardContent>
                 <div className="space-y-2">
                   {anamneseSummary.reasons.map(([reason, count]) => (
-                    <div key={reason} className="flex items-center justify-between rounded-lg border border-white/[0.05] px-3 py-2">
-                      <span className="text-sm text-white/70 truncate mr-2">{reason}</span>
-                      <span className="text-sm font-medium text-white shrink-0">{count}x</span>
+                    <div key={reason} className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+                      <span className="text-sm text-foreground/70 truncate mr-2">{reason}</span>
+                      <span className="text-sm font-medium text-foreground shrink-0">{count}x</span>
                     </div>
                   ))}
                 </div>

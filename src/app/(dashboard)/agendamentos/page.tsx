@@ -69,15 +69,15 @@ export default function AgendamentosPage() {
     <PageTransition className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Agendamentos</h1>
-          <p className="text-sm text-white/50">Gerencie a agenda da clínica</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Agendamentos</h1>
+          <p className="text-sm text-muted-foreground">Gerencie a agenda da clínica</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex rounded-xl border border-white/[0.08] p-0.5 bg-white/[0.03]">
+          <div className="flex rounded-xl border border-border p-0.5 bg-card">
             <button
               onClick={() => setModo("lista")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                modo === "lista" ? "bg-primary/20 text-primary" : "text-white/40 hover:text-white/70"
+                modo === "lista" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground/70"
               }`}
             >
               <List className="h-3.5 w-3.5" />
@@ -86,7 +86,7 @@ export default function AgendamentosPage() {
             <button
               onClick={() => setModo("calendario")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                modo === "calendario" ? "bg-primary/20 text-primary" : "text-white/40 hover:text-white/70"
+                modo === "calendario" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground/70"
               }`}
             >
               <CalendarDays className="h-3.5 w-3.5" />
@@ -106,7 +106,7 @@ export default function AgendamentosPage() {
         <Card>
           <CardHeader>
             <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
               <Input
                 placeholder="Buscar por paciente ou profissional..."
                 className="pl-10"
@@ -119,11 +119,11 @@ export default function AgendamentosPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-white/50">Data/Hora</TableHead>
-                  <TableHead className="text-white/50">Paciente</TableHead>
-                  <TableHead className="text-white/50">Profissional</TableHead>
-                  <TableHead className="text-white/50">Status</TableHead>
-                  <TableHead className="text-right text-white/50">Ações</TableHead>
+                  <TableHead className="text-muted-foreground">Data/Hora</TableHead>
+                  <TableHead className="text-muted-foreground">Paciente</TableHead>
+                  <TableHead className="text-muted-foreground">Profissional</TableHead>
+                  <TableHead className="text-muted-foreground">Status</TableHead>
+                  <TableHead className="text-right text-muted-foreground">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -137,7 +137,7 @@ export default function AgendamentosPage() {
                   ))
                 ) : filtered.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-12 text-white/40">
+                    <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
                       {search ? "Nenhum agendamento encontrado para esta busca" : "Nenhum agendamento encontrado"}
                     </TableCell>
                   </TableRow>
@@ -148,10 +148,10 @@ export default function AgendamentosPage() {
                       day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
                     })
                     return (
-                      <TableRow key={ag.id} className="hover:bg-white/[0.03] border-white/[0.06]">
-                        <TableCell className="font-medium text-white">{dataHora}</TableCell>
-                        <TableCell className="text-white/80">{(ag as any).pacientes?.nome ?? "—"}</TableCell>
-                        <TableCell className="text-white/60">{(ag as any).profissionais?.nome ?? "—"}</TableCell>
+                      <TableRow key={ag.id} className="hover:bg-card border-border">
+                        <TableCell className="font-medium text-foreground">{dataHora}</TableCell>
+                        <TableCell className="text-foreground">{(ag as any).pacientes?.nome ?? "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">{(ag as any).profissionais?.nome ?? "—"}</TableCell>
                         <TableCell>
                           <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
                         </TableCell>

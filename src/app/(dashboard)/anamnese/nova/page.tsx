@@ -74,8 +74,8 @@ function FormularioAnamnese() {
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Nova Anamnese</h1>
-          <p className="text-sm text-white/50">Preencha a ficha clínica do paciente</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Nova Anamnese</h1>
+          <p className="text-sm text-muted-foreground">Preencha a ficha clínica do paciente</p>
         </div>
       </div>
 
@@ -95,7 +95,7 @@ function FormularioAnamnese() {
                 ) : (
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label className="text-white/70">Paciente *</Label>
+                      <Label className="text-foreground/70">Paciente *</Label>
                       <Select
                         value={selectedPaciente}
                         onValueChange={setSelectedPaciente}
@@ -111,7 +111,7 @@ function FormularioAnamnese() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-white/70">Profissional Responsável *</Label>
+                      <Label className="text-foreground/70">Profissional Responsável *</Label>
                       <Select name="profissional_id" required>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione..." />
@@ -135,14 +135,14 @@ function FormularioAnamnese() {
               <CardContent className="space-y-3">
                 {questoes.map((q, i) => (
                   <div key={q.id}>
-                    <div className="flex items-start justify-between gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-                      <p className="text-sm text-white/80 flex-1">{q.texto}</p>
+                    <div className="flex items-start justify-between gap-4 rounded-xl border border-border bg-card p-4">
+                      <p className="text-sm text-foreground flex-1">{q.texto}</p>
                       <div className="flex gap-2 shrink-0">
                         <label className="cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-all has-[:checked]:bg-emerald-500/30 has-[:checked]:ring-2 has-[:checked]:ring-emerald-500/50">
                           <input type="radio" name={q.id} value="sim" className="sr-only" />
                           Sim
                         </label>
-                        <label className="cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white transition-all has-[:checked]:bg-red-500/20 has-[:checked]:border-red-500/30 has-[:checked]:text-red-400">
+                        <label className="cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium border border-border bg-card text-muted-foreground hover:bg-card hover:text-foreground transition-all has-[:checked]:bg-red-500/20 has-[:checked]:border-red-500/30 has-[:checked]:text-red-400">
                           <input type="radio" name={q.id} value="nao" className="sr-only" defaultChecked />
                           Não
                         </label>
@@ -183,7 +183,7 @@ function FormularioAnamnese() {
               <CardHeader>
                 <CardTitle className="text-sm">Sobre a Anamnese</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 text-sm text-white/60">
+              <CardContent className="space-y-3 text-sm text-muted-foreground">
                 <p>A anamnese é o histórico clínico do paciente. É fundamental para um tratamento seguro.</p>
                 <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3">
                   <p className="text-amber-400 font-medium text-xs mb-1 flex items-center gap-1">
@@ -193,7 +193,7 @@ function FormularioAnamnese() {
                   <p className="text-xs">Verifique sempre alergias e condições sistêmicas antes de iniciar qualquer procedimento.</p>
                 </div>
                 <div className="space-y-1.5">
-                  <p className="text-xs font-medium text-white/40 uppercase tracking-wider">Condições de Alerta</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Condições de Alerta</p>
                   {["Diabetes", "Hipertensão", "Cardiopatia", "Coagulopatia", "Gravidez"].map((c) => (
                     <div key={c} className="flex items-center gap-2">
                       <div className="h-1.5 w-1.5 rounded-full bg-red-400" />
@@ -214,7 +214,7 @@ export default function NovaAnamnesePage() {
   return (
     <Suspense fallback={
       <div className="flex items-center justify-center h-64">
-        <p className="text-white/40">Carregando...</p>
+        <p className="text-muted-foreground">Carregando...</p>
       </div>
     }>
       <FormularioAnamnese />

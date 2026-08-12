@@ -70,8 +70,8 @@ export default function FinanceiroCadeirasPage() {
   return (
     <PageTransition className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-white">Cadeiras / Salas</h1>
-        <p className="text-sm text-white/50">Repasse de sublocação recebido de dentistas parceiros</p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Cadeiras / Salas</h1>
+        <p className="text-sm text-muted-foreground">Repasse de sublocação recebido de dentistas parceiros</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -84,11 +84,11 @@ export default function FinanceiroCadeirasPage() {
             <motion.div key={item.titulo} initial={false} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-white/60">{item.titulo}</CardTitle>
-                  <Icon className="h-4 w-4 text-white/40" />
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{item.titulo}</CardTitle>
+                  <Icon className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  {loading ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-bold text-white">{item.valor}</div>}
+                  {loading ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-bold text-foreground">{item.valor}</div>}
                 </CardContent>
               </Card>
             </motion.div>
@@ -115,12 +115,12 @@ export default function FinanceiroCadeirasPage() {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="profissional_id" className="text-white/70">Sublocatário</Label>
+              <Label htmlFor="profissional_id" className="text-foreground/70">Sublocatário</Label>
               <select
                 id="profissional_id"
                 name="profissional_id"
                 required
-                className="flex h-10 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
+                className="flex h-10 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
               >
                 <option value="">Selecione...</option>
                 {sublocatarios.map((p) => (
@@ -129,17 +129,17 @@ export default function FinanceiroCadeirasPage() {
               </select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="competencia" className="text-white/70">Competência</Label>
+              <Label htmlFor="competencia" className="text-foreground/70">Competência</Label>
               <Input id="competencia" name="competencia" type="month" defaultValue={mesAtual()} required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="tipo_cobranca" className="text-white/70">Tipo</Label>
+              <Label htmlFor="tipo_cobranca" className="text-foreground/70">Tipo</Label>
               <select
                 id="tipo_cobranca"
                 name="tipo_cobranca"
                 value={tipoCobranca}
                 onChange={(e) => setTipoCobranca(e.target.value as "fixo" | "percentual")}
-                className="flex h-10 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
+                className="flex h-10 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
               >
                 <option value="fixo">Valor fixo mensal</option>
                 <option value="percentual">% do faturamento do mês</option>
@@ -147,12 +147,12 @@ export default function FinanceiroCadeirasPage() {
             </div>
             {tipoCobranca === "fixo" ? (
               <div className="space-y-2">
-                <Label htmlFor="valor_fixo_mensal" className="text-white/70">Valor (R$)</Label>
+                <Label htmlFor="valor_fixo_mensal" className="text-foreground/70">Valor (R$)</Label>
                 <Input id="valor_fixo_mensal" name="valor_fixo_mensal" type="number" step="0.01" min="0" placeholder="1500.00" required />
               </div>
             ) : (
               <div className="space-y-2">
-                <Label htmlFor="percentual_faturamento" className="text-white/70">Percentual (%)</Label>
+                <Label htmlFor="percentual_faturamento" className="text-foreground/70">Percentual (%)</Label>
                 <Input id="percentual_faturamento" name="percentual_faturamento" type="number" step="0.01" min="0" max="100" placeholder="20" required />
               </div>
             )}
@@ -160,7 +160,7 @@ export default function FinanceiroCadeirasPage() {
               {pending ? "Salvando..." : "Lançar Cobrança"}
             </Button>
           </form>
-          <p className="mt-2 text-xs text-white/40">
+          <p className="mt-2 text-xs text-muted-foreground">
             No modo percentual, o valor é calculado automaticamente sobre a soma do faturamento do profissional
             selecionado na competência escolhida.
           </p>
@@ -175,13 +175,13 @@ export default function FinanceiroCadeirasPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-white/50">Competência</TableHead>
-                <TableHead className="text-white/50">Sublocatário</TableHead>
-                <TableHead className="text-white/50">Tipo</TableHead>
-                <TableHead className="text-white/50">Base de Cálculo</TableHead>
-                <TableHead className="text-white/50">Valor</TableHead>
-                <TableHead className="text-white/50">Status</TableHead>
-                <TableHead className="text-right text-white/50">Ações</TableHead>
+                <TableHead className="text-muted-foreground">Competência</TableHead>
+                <TableHead className="text-muted-foreground">Sublocatário</TableHead>
+                <TableHead className="text-muted-foreground">Tipo</TableHead>
+                <TableHead className="text-muted-foreground">Base de Cálculo</TableHead>
+                <TableHead className="text-muted-foreground">Valor</TableHead>
+                <TableHead className="text-muted-foreground">Status</TableHead>
+                <TableHead className="text-right text-muted-foreground">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -195,7 +195,7 @@ export default function FinanceiroCadeirasPage() {
                 ))
               ) : cobrancas.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12 text-white/40">
+                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
                     Nenhuma cobrança de sublocação registrada ainda
                   </TableCell>
                 </TableRow>
@@ -204,13 +204,13 @@ export default function FinanceiroCadeirasPage() {
                   const statusInfo = statusMap[c.status_pagamento] ?? { label: c.status_pagamento, variant: "default" as const }
                   const [ano, mes] = c.competencia.split("-")
                   return (
-                    <TableRow key={c.id} className="hover:bg-white/[0.03] border-white/[0.06]">
-                      <TableCell className="text-white/60">{mes}/{ano}</TableCell>
-                      <TableCell className="font-medium text-white">{c.profissionais?.nome ?? "—"}</TableCell>
-                      <TableCell className="text-white/60">
+                    <TableRow key={c.id} className="hover:bg-card border-border">
+                      <TableCell className="text-muted-foreground">{mes}/{ano}</TableCell>
+                      <TableCell className="font-medium text-foreground">{c.profissionais?.nome ?? "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">
                         {c.tipo_cobranca === "percentual" ? `${c.percentual_faturamento}% do faturamento` : "Fixo"}
                       </TableCell>
-                      <TableCell className="text-white/60">
+                      <TableCell className="text-muted-foreground">
                         {c.tipo_cobranca === "percentual" ? formatCurrency(Number(c.faturamento_base)) : "—"}
                       </TableCell>
                       <TableCell className="font-semibold text-[#6EE7B7]">{formatCurrency(Number(c.valor_calculado))}</TableCell>

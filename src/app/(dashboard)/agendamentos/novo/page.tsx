@@ -51,8 +51,8 @@ export default function NovoAgendamentoPage() {
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Novo Agendamento</h1>
-          <p className="text-sm text-white/50">Reserve um horario na agenda da clinica</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Novo Agendamento</h1>
+          <p className="text-sm text-muted-foreground">Reserve um horario na agenda da clinica</p>
         </div>
       </div>
 
@@ -73,7 +73,7 @@ export default function NovoAgendamentoPage() {
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="paciente_id" className="text-white/70">Paciente *</Label>
+                <Label htmlFor="paciente_id" className="text-foreground/70">Paciente *</Label>
                 <Select name="paciente_id" required disabled={loading || pending}>
                   <SelectTrigger id="paciente_id">
                     <SelectValue placeholder={loading ? "Carregando pacientes..." : "Selecione o paciente"} />
@@ -89,7 +89,7 @@ export default function NovoAgendamentoPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="profissional_id" className="text-white/70">Profissional *</Label>
+                <Label htmlFor="profissional_id" className="text-foreground/70">Profissional *</Label>
                 <Select name="profissional_id" required disabled={loading || pending}>
                   <SelectTrigger id="profissional_id">
                     <SelectValue placeholder={loading ? "Carregando profissionais..." : "Selecione o profissional"} />
@@ -105,23 +105,23 @@ export default function NovoAgendamentoPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="data" className="text-white/70">Data *</Label>
+                <Label htmlFor="data" className="text-foreground/70">Data *</Label>
                 <Input id="data" name="data" type="date" required disabled={pending} />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="hora" className="text-white/70">Hora *</Label>
+                <Label htmlFor="hora" className="text-foreground/70">Hora *</Label>
                 <Input id="hora" name="hora" type="time" required disabled={pending} />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="duracao" className="text-white/70">Duracao</Label>
+                <Label htmlFor="duracao" className="text-foreground/70">Duracao</Label>
                 <select
                   id="duracao"
                   name="duracao"
                   defaultValue="30"
                   disabled={pending}
-                  className="flex h-10 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="flex h-10 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
                 >
                   <option value="30">30 minutos</option>
                   <option value="45">45 minutos</option>

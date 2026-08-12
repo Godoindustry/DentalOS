@@ -73,7 +73,7 @@ export default function DetalhesFaturamentoPage() {
   if (!fat) {
     return (
       <div className="flex flex-col items-center justify-center py-20 space-y-4">
-        <p className="text-white/50">Lançamento não encontrado.</p>
+        <p className="text-muted-foreground">Lançamento não encontrado.</p>
         <Button asChild variant="outline"><Link href="/faturamento">Voltar</Link></Button>
       </div>
     )
@@ -89,26 +89,26 @@ export default function DetalhesFaturamentoPage() {
         </Button>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-white">Detalhes do Lançamento</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Detalhes do Lançamento</h1>
             <Badge variant={isPago ? "success" : "warning"}>
               {isPago ? "Pago" : fat.status_pagamento === "pendente" ? "Pendente" : "Estornado"}
             </Badge>
           </div>
-          <p className="text-sm text-white/50">Informações completas do procedimento cobrado</p>
+          <p className="text-sm text-muted-foreground">Informações completas do procedimento cobrado</p>
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {[
-          { icon: DollarSign, label: "Valor Bruto", value: formatCurrency(Number(fat.valor_bruto_pago)), cor: "text-white" },
+          { icon: DollarSign, label: "Valor Bruto", value: formatCurrency(Number(fat.valor_bruto_pago)), cor: "text-foreground" },
           { icon: User, label: "Comissão", value: formatCurrency(Number(fat.comissao_retida_dentista)), cor: "text-amber-400" },
           { icon: DollarSign, label: "Lucro Líquido", value: formatCurrency(Number(fat.lucro_liquido_clinica)), cor: "text-emerald-400" },
           { icon: CreditCard, label: "Forma de Pagamento", value: formaPagamentoLabels[fat.forma_pagamento] ?? fat.forma_pagamento, cor: "text-primary" },
         ].map((item) => (
           <Card key={item.label} className="overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-white/70">{item.label}</CardTitle>
-              <item.icon className="h-4 w-4 text-white/30" />
+              <CardTitle className="text-sm font-medium text-foreground/70">{item.label}</CardTitle>
+              <item.icon className="h-4 w-4 text-muted-foreground/70" />
             </CardHeader>
             <CardContent>
               <p className={`text-xl font-bold ${item.cor}`}>{item.value}</p>
@@ -130,8 +130,8 @@ export default function DetalhesFaturamentoPage() {
               { label: "Data", value: new Date(fat.data_competencia).toLocaleDateString("pt-BR") },
             ].map((item) => (
               <div key={item.label} className="space-y-1">
-                <p className="text-xs text-white/40">{item.label}</p>
-                <p className="text-sm font-medium text-white bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2">{item.value}</p>
+                <p className="text-xs text-muted-foreground">{item.label}</p>
+                <p className="text-sm font-medium text-foreground bg-card border border-border rounded-lg px-3 py-2">{item.value}</p>
               </div>
             ))}
           </div>

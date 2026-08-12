@@ -216,7 +216,7 @@ export function DentalJawViewer() {
           onClick={toggle}
           whileHover={{ scale: 1.04 }}
           whileTap={{ scale: 0.96 }}
-          className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white shadow-lg backdrop-blur-md transition-colors hover:bg-white/18"
+          className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground shadow-lg backdrop-blur-md transition-colors hover:bg-accent"
         >
           <AnimatePresence mode="wait" initial={false}>
             <motion.span
@@ -231,14 +231,14 @@ export function DentalJawViewer() {
           </AnimatePresence>
         </motion.button>
 
-        <span className="hidden rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-[11px] text-white/35 backdrop-blur-sm sm:inline">
+        <span className="hidden rounded-lg border border-border bg-black/20 px-3 py-2 text-[11px] text-foreground/35 backdrop-blur-sm sm:inline">
           Arraste · Scroll · Clique no modelo
         </span>
       </div>
 
       {/* ── Badge ATM ─────────────────────────────────────────────────── */}
       <div className="absolute bottom-4 right-4 z-10">
-        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-medium text-white/30 backdrop-blur-sm">
+        <span className="rounded-full border border-border bg-card px-3 py-1 text-[10px] font-medium text-muted-foreground/70 backdrop-blur-sm">
           Manequim 3D · ATM Interativa · FDI
         </span>
       </div>
@@ -252,11 +252,11 @@ export function DentalJawViewer() {
             exit={{ opacity: 0, x: 12 }}
             className="absolute right-4 top-4 z-10"
           >
-            <div className="flex flex-col items-end gap-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 backdrop-blur-sm">
+            <div className="flex flex-col items-end gap-1 rounded-xl border border-border bg-card px-3 py-2.5 backdrop-blur-sm">
               <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400/80">
                 Abertura ativo
               </span>
-              <span className="text-[11px] text-white/50">ATM: ~28° rotação</span>
+              <span className="text-[11px] text-muted-foreground">ATM: ~28° rotação</span>
             </div>
           </motion.div>
         )}

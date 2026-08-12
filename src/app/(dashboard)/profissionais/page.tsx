@@ -42,8 +42,8 @@ export default function ProfissionaisPage() {
     <PageTransition className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Profissionais</h1>
-          <p className="text-sm text-white/50">Gerencie os dentistas e profissionais da clínica</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Profissionais</h1>
+          <p className="text-sm text-muted-foreground">Gerencie os dentistas e profissionais da clínica</p>
         </div>
         <Button asChild>
           <Link href="/profissionais/novo">
@@ -56,7 +56,7 @@ export default function ProfissionaisPage() {
       <Card>
         <CardHeader>
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
             <Input
               placeholder="Buscar profissional..."
               className="pl-10"
@@ -69,12 +69,12 @@ export default function ProfissionaisPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-white/50">Profissional</TableHead>
-                <TableHead className="text-white/50">CRO</TableHead>
-                <TableHead className="text-white/50">Especialidade</TableHead>
-                <TableHead className="text-white/50">Comissão</TableHead>
-                <TableHead className="text-white/50">Status</TableHead>
-                <TableHead className="text-right text-white/50">Ações</TableHead>
+                <TableHead className="text-muted-foreground">Profissional</TableHead>
+                <TableHead className="text-muted-foreground">CRO</TableHead>
+                <TableHead className="text-muted-foreground">Especialidade</TableHead>
+                <TableHead className="text-muted-foreground">Comissão</TableHead>
+                <TableHead className="text-muted-foreground">Status</TableHead>
+                <TableHead className="text-right text-muted-foreground">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -88,22 +88,22 @@ export default function ProfissionaisPage() {
                 ))
               ) : filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12 text-white/40">
+                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
                     {search ? "Nenhum profissional encontrado para esta busca" : "Nenhum profissional cadastrado ainda"}
                   </TableCell>
                 </TableRow>
               ) : (
                 filtered.map((prof) => (
-                  <TableRow key={prof.id} className="hover:bg-white/[0.03] border-white/[0.06]">
+                  <TableRow key={prof.id} className="hover:bg-card border-border">
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
                           <Stethoscope className="h-4 w-4 text-primary" />
                         </div>
-                        <span className="font-medium text-white">{prof.nome}</span>
+                        <span className="font-medium text-foreground">{prof.nome}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-white/60">
+                    <TableCell className="text-muted-foreground">
                       <div className="flex items-center gap-1.5">
                         {prof.cro}-{prof.uf_cro}
                         {prof.cro_verificado ? (
@@ -113,8 +113,8 @@ export default function ProfissionaisPage() {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="text-white/60">{prof.especialidade_principal || "–"}</TableCell>
-                    <TableCell className="text-white/60">{prof.porcentagem_comissao}%</TableCell>
+                    <TableCell className="text-muted-foreground">{prof.especialidade_principal || "–"}</TableCell>
+                    <TableCell className="text-muted-foreground">{prof.porcentagem_comissao}%</TableCell>
                     <TableCell>
                       <Badge variant={prof.ativo ? "success" : "secondary"}>
                         {prof.ativo ? "Ativo" : "Inativo"}

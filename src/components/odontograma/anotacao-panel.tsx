@@ -62,7 +62,7 @@ export function AnotacaoPanel({ toothNumber }: AnotacaoPanelProps) {
         onClick={() => setExpanded((v) => !v)}
         className="w-full flex items-center justify-between text-left"
       >
-        <span className="text-xs font-semibold text-white/40 uppercase tracking-wider flex items-center gap-2">
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
           <MessageSquarePlus className="h-3.5 w-3.5" />
           Anotações Clínicas
           {anotacoes.length > 0 && (
@@ -72,8 +72,8 @@ export function AnotacaoPanel({ toothNumber }: AnotacaoPanelProps) {
           )}
         </span>
         {expanded
-          ? <ChevronUp className="h-3.5 w-3.5 text-white/25" />
-          : <ChevronDown className="h-3.5 w-3.5 text-white/25" />
+          ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground/70" />
+          : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/70" />
         }
       </button>
 
@@ -96,13 +96,13 @@ export function AnotacaoPanel({ toothNumber }: AnotacaoPanelProps) {
                   onKeyDown={handleKeyDown}
                   rows={3}
                   placeholder={`Anotação para dente ${toothNumber}...\n(Enter para salvar, Shift+Enter para nova linha)`}
-                  className="w-full rounded-xl bg-white/[0.04] border border-white/[0.07] px-3 pt-3 pb-8 text-xs text-white/80 placeholder:text-white/20 resize-none outline-none focus:border-purple-500/40 focus:bg-purple-500/5 transition-all leading-relaxed"
+                  className="w-full rounded-xl bg-card border border-border px-3 pt-3 pb-8 text-xs text-foreground placeholder:text-muted-foreground/60 resize-none outline-none focus:border-purple-500/40 focus:bg-purple-500/5 transition-all leading-relaxed"
                 />
                 {/* Contador e botão */}
                 <div className="absolute bottom-2 right-2 flex items-center gap-2">
                   <span className={cn(
                     "text-[9px] font-mono",
-                    texto.length > MAX * 0.9 ? "text-red-400/60" : "text-white/20",
+                    texto.length > MAX * 0.9 ? "text-red-400/60" : "text-muted-foreground/60",
                   )}>
                     {texto.length}/{MAX}
                   </span>
@@ -114,7 +114,7 @@ export function AnotacaoPanel({ toothNumber }: AnotacaoPanelProps) {
                       "rounded-lg px-2 py-1 text-[10px] font-medium border transition-all",
                       texto.trim()
                         ? "border-purple-500/40 bg-purple-500/20 text-purple-300 hover:bg-purple-500/30"
-                        : "border-white/[0.05] text-white/20 cursor-not-allowed",
+                        : "border-border text-muted-foreground/60 cursor-not-allowed",
                     )}
                   >
                     Salvar
@@ -124,7 +124,7 @@ export function AnotacaoPanel({ toothNumber }: AnotacaoPanelProps) {
 
               {/* Lista de anotações */}
               {anotacoes.length === 0 ? (
-                <p className="text-[10px] text-white/20 text-center py-2">
+                <p className="text-[10px] text-muted-foreground/60 text-center py-2">
                   Nenhuma anotação para o dente {toothNumber}.
                 </p>
               ) : (
@@ -137,17 +137,17 @@ export function AnotacaoPanel({ toothNumber }: AnotacaoPanelProps) {
                         animate={{ opacity: 1, x: 0, height: "auto" }}
                         exit={{ opacity: 0, x: 10, height: 0 }}
                         transition={{ duration: 0.18 }}
-                        className="group relative rounded-xl border border-white/[0.07] bg-white/[0.03] p-3 overflow-hidden"
+                        className="group relative rounded-xl border border-border bg-card p-3 overflow-hidden"
                       >
                         {/* Borda esquerda colorida */}
                         <div className="absolute left-0 inset-y-0 w-0.5 bg-purple-500/40 rounded-r-full" />
 
-                        <p className="text-xs text-white/70 leading-relaxed break-words">
+                        <p className="text-xs text-foreground/70 leading-relaxed break-words">
                           {a.texto}
                         </p>
 
                         <div className="flex items-center justify-between mt-2">
-                          <span className="flex items-center gap-1 text-[9px] text-white/25">
+                          <span className="flex items-center gap-1 text-[9px] text-muted-foreground/70">
                             <Clock className="h-2.5 w-2.5" />
                             {formatDate(a.criadoEm)}
                           </span>

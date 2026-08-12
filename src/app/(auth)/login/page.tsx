@@ -26,7 +26,7 @@ function LoginContent() {
   const message = searchParams.get("message")
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4">
+    <div className="dark relative flex min-h-screen items-center justify-center overflow-hidden p-4">
       <div className="absolute inset-0 bg-gradient-to-br from-[#002B36] via-[#0A424F] to-[#002B36]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(59,130,246,0.08),transparent_50%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(16,185,129,0.05),transparent_50%)]" />
@@ -109,7 +109,7 @@ function LoginContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4">
+      <div className="dark relative flex min-h-screen items-center justify-center overflow-hidden p-4">
         <div className="absolute inset-0 bg-gradient-to-br from-[#002B36] via-[#0A424F] to-[#002B36]" />
         <div className="w-full max-w-md">
           <Card className="border-white/[0.08] shadow-2xl shadow-black/30">

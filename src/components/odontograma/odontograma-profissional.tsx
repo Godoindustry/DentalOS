@@ -187,14 +187,14 @@ export function OdontogramaProfissional({ pacienteId }: OdontogramaProfissionalP
               >
                 {icone}
               </div>
-              <span className="text-[10px] text-white/45 leading-none">{item.label}</span>
+              <span className="text-[10px] text-foreground/45 leading-none">{item.label}</span>
             </div>
           )
         })}
       </div>
 
       {/* Contêiner do SVG */}
-      <div className="relative rounded-2xl border border-white/[0.07] bg-white/[0.015] overflow-hidden">
+      <div className="relative rounded-2xl border border-border bg-card overflow-hidden">
 
         {/* Banner de modo ativo */}
         {activeProcedure && (
@@ -333,7 +333,7 @@ export function OdontogramaProfissional({ pacienteId }: OdontogramaProfissionalP
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            className="flex items-center justify-center gap-2 text-xs text-white/30"
+            className="flex items-center justify-center gap-2 text-xs text-muted-foreground/70"
           >
             <Loader2 className="h-3 w-3 animate-spin" />
             Salvando...
@@ -350,22 +350,22 @@ export function OdontogramaProfissional({ pacienteId }: OdontogramaProfissionalP
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 14, scale: 0.97 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="rounded-2xl border border-white/[0.10] bg-white/[0.03] backdrop-blur-xl p-5 space-y-4"
+            className="rounded-2xl border border-border bg-card backdrop-blur-xl p-5 space-y-4"
           >
             {/* Cabeçalho */}
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
                 <div className="flex items-center gap-2.5 flex-wrap">
-                  <span className="text-sm font-semibold text-white">
+                  <span className="text-sm font-semibold text-foreground">
                     Dente {selectedFace.numero}
                   </span>
                   <Badge variant="secondary" className="text-[10px] px-2 py-0.5 font-normal">
                     {currentDente.nome}
                   </Badge>
                 </div>
-                <p className="text-xs text-white/45 mt-1.5">
+                <p className="text-xs text-foreground/45 mt-1.5">
                   Face:{" "}
-                  <span className="text-white/70 font-medium">
+                  <span className="text-foreground/70 font-medium">
                     {FACE_LABELS[selectedFace.face]}
                   </span>
                   <span className="mx-1.5">·</span>
@@ -387,7 +387,7 @@ export function OdontogramaProfissional({ pacienteId }: OdontogramaProfissionalP
               </div>
               <button
                 onClick={() => setSelectedFace(null)}
-                className="shrink-0 h-6 w-6 flex items-center justify-center rounded-md text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-all text-sm leading-none"
+                className="shrink-0 h-6 w-6 flex items-center justify-center rounded-md text-muted-foreground/60 hover:text-muted-foreground hover:bg-accent transition-all text-sm leading-none"
               >
                 ✕
               </button>
@@ -395,7 +395,7 @@ export function OdontogramaProfissional({ pacienteId }: OdontogramaProfissionalP
 
             {/* Seleção de estado da face */}
             <div>
-              <p className="text-[11px] font-medium text-white/35 uppercase tracking-wider mb-3">
+              <p className="text-[11px] font-medium text-foreground/35 uppercase tracking-wider mb-3">
                 Alterar estado da face
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -419,7 +419,7 @@ export function OdontogramaProfissional({ pacienteId }: OdontogramaProfissionalP
                         "rounded-lg px-2.5 py-1.5 text-[11px] font-medium border transition-all flex items-center gap-1.5",
                         isAtivo
                           ? "border-purple-500/40 bg-purple-500/15 text-purple-300"
-                          : "border-white/[0.08] bg-white/[0.04] text-white/55 hover:bg-white/[0.08] hover:text-white/80"
+                          : "border-border bg-card text-foreground/55 hover:bg-accent hover:text-foreground"
                       )}
                     >
                       <div
@@ -445,7 +445,7 @@ export function OdontogramaProfissional({ pacienteId }: OdontogramaProfissionalP
                   "rounded-lg px-3 py-1.5 text-xs font-medium border transition-all flex items-center gap-1.5",
                   currentDente.implante
                     ? "border-cyan-500/40 bg-cyan-500/15 text-cyan-300"
-                    : "border-white/[0.08] bg-white/[0.04] text-white/55 hover:bg-white/[0.08]"
+                    : "border-border bg-card text-foreground/55 hover:bg-accent"
                 )}
               >
                 <Syringe className="h-3 w-3" />
@@ -459,7 +459,7 @@ export function OdontogramaProfissional({ pacienteId }: OdontogramaProfissionalP
                   "rounded-lg px-3 py-1.5 text-xs font-medium border transition-all flex items-center gap-1.5",
                   currentDente.extracao
                     ? "border-violet-500/40 bg-violet-500/15 text-violet-300"
-                    : "border-white/[0.08] bg-white/[0.04] text-white/55 hover:bg-white/[0.08]"
+                    : "border-border bg-card text-foreground/55 hover:bg-accent"
                 )}
               >
                 <X className="h-3 w-3" />

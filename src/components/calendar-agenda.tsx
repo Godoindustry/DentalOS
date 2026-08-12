@@ -72,12 +72,12 @@ export function CalendarAgenda({ agendamentos, onSelectPaciente }: CalendarAgend
   return (
     <div className="grid gap-4 md:grid-cols-[1fr_320px]">
       {/* Grid do calendário */}
-      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
+      <div className="rounded-2xl border border-border bg-card p-4">
         <div className="flex items-center justify-between mb-4">
           <Button variant="ghost" size="icon" onClick={() => navegar(-1)}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <p className="text-sm font-semibold text-white capitalize">
+          <p className="text-sm font-semibold text-foreground capitalize">
             {mesNome} {anoAtual}
           </p>
           <Button variant="ghost" size="icon" onClick={() => navegar(1)}>
@@ -87,7 +87,7 @@ export function CalendarAgenda({ agendamentos, onSelectPaciente }: CalendarAgend
 
         <div className="grid grid-cols-7 gap-1">
           {DIAS_SEMANA.map((d) => (
-            <div key={d} className="text-center text-xs text-white/30 font-medium py-2">
+            <div key={d} className="text-center text-xs text-muted-foreground/70 font-medium py-2">
               {d}
             </div>
           ))}
@@ -107,7 +107,7 @@ export function CalendarAgenda({ agendamentos, onSelectPaciente }: CalendarAgend
                     ? "bg-primary/20 text-primary border border-primary/30"
                     : isHoje
                       ? "bg-primary/10 text-primary border border-primary/20"
-                      : "text-white/70 hover:bg-white/5"
+                      : "text-foreground/70 hover:bg-card"
                 )}
               >
                 {dia}
@@ -126,18 +126,18 @@ export function CalendarAgenda({ agendamentos, onSelectPaciente }: CalendarAgend
       </div>
 
       {/* Sidebar: compromissos do dia */}
-      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 space-y-3">
-        <p className="text-xs font-semibold text-white/40 uppercase tracking-wider">
+      <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           {diaSelecionado
             ? `${diaSelecionado} de ${mesNome}`
             : "Selecione um dia"}
         </p>
         {diaSelecionado === null ? (
-          <p className="text-xs text-white/30 py-8 text-center">
+          <p className="text-xs text-muted-foreground/70 py-8 text-center">
             Clique em um dia para ver os agendamentos
           </p>
         ) : appointmentsCount === 0 ? (
-          <p className="text-xs text-white/30 py-8 text-center">
+          <p className="text-xs text-muted-foreground/70 py-8 text-center">
             Nenhum agendamento neste dia
           </p>
         ) : (
@@ -151,18 +151,18 @@ export function CalendarAgenda({ agendamentos, onSelectPaciente }: CalendarAgend
                 return (
                   <div
                     key={a.id}
-                    className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-3 space-y-1.5 cursor-pointer hover:bg-white/[0.06] transition-colors"
+                    className="rounded-xl border border-border bg-card p-3 space-y-1.5 cursor-pointer hover:bg-accent transition-colors"
                     onClick={() => onSelectPaciente(a.paciente_id)}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-white">
+                      <span className="text-sm font-medium text-foreground">
                         {(a as any).pacientes?.nome ?? "—"}
                       </span>
                       <Badge variant={info.variant} className="text-[10px] px-1.5 py-0">
                         {info.label}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-white/40">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <span>{hora} - {horaFim}</span>
                       <span>·</span>
                       <span>{(a as any).profissionais?.nome ?? "—"}</span>

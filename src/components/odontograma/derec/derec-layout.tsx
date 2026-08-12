@@ -28,7 +28,7 @@ export function DerecLayout() {
 
       {/* ── Sidebar Principal (Azul - Esquerda) ── */}
       <div className="w-16 shrink-0 bg-slate-950 border-r border-slate-800 flex flex-col items-center py-4">
-        <button className="p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors mb-6">
+        <button className="p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-foreground transition-colors mb-6">
           <ArrowLeft className="w-5 h-5" />
         </button>
 

@@ -36,8 +36,8 @@ export default function NovoProfissionalPage() {
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Novo Profissional</h1>
-          <p className="text-sm text-white/50">Cadastre um novo dentista ou profissional</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Novo Profissional</h1>
+          <p className="text-sm text-muted-foreground">Cadastre um novo dentista ou profissional</p>
         </div>
       </div>
 
@@ -54,15 +54,15 @@ export default function NovoProfissionalPage() {
             )}
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="nome" className="text-white/70">Nome Completo *</Label>
+                <Label htmlFor="nome" className="text-foreground/70">Nome Completo *</Label>
                 <Input id="nome" name="nome" placeholder="Dr. Nome do Profissional" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="especialidade" className="text-white/70">Especialidade Principal</Label>
+                <Label htmlFor="especialidade" className="text-foreground/70">Especialidade Principal</Label>
                 <select
                   id="especialidade"
                   name="especialidade"
-                  className="flex h-10 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
+                  className="flex h-10 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
                 >
                   <option value="">Selecione...</option>
                   <option value="Clínico Geral">Clínico Geral</option>
@@ -75,15 +75,15 @@ export default function NovoProfissionalPage() {
                 </select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="cro" className="text-white/70">CRO *</Label>
+                <Label htmlFor="cro" className="text-foreground/70">CRO *</Label>
                 <Input id="cro" name="cro" placeholder="00000" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="uf_cro" className="text-white/70">UF do CRO *</Label>
+                <Label htmlFor="uf_cro" className="text-foreground/70">UF do CRO *</Label>
                 <select
                   id="uf_cro"
                   name="uf_cro"
-                  className="flex h-10 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
+                  className="flex h-10 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
                   required
                 >
                   <option value="">UF</option>
@@ -91,36 +91,36 @@ export default function NovoProfissionalPage() {
                     <option key={uf} value={uf}>{uf}</option>
                   ))}
                 </select>
-                <p className="text-xs text-white/40">Formato validado (dígitos + UF); não consulta o cadastro oficial do CRO em tempo real.</p>
+                <p className="text-xs text-muted-foreground">Formato validado (dígitos + UF); não consulta o cadastro oficial do CRO em tempo real.</p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="comissao" className="text-white/70">Porcentagem de Comissão (%)</Label>
+                <Label htmlFor="comissao" className="text-foreground/70">Porcentagem de Comissão (%)</Label>
                 <Input id="comissao" name="comissao" type="number" placeholder="40" defaultValue="40" />
               </div>
             </div>
 
-            <div className="space-y-2 border-t border-white/10 pt-6">
-              <Label htmlFor="role" className="text-white/70">Tipo de Vínculo</Label>
+            <div className="space-y-2 border-t border-border pt-6">
+              <Label htmlFor="role" className="text-foreground/70">Tipo de Vínculo</Label>
               <select
                 id="role"
                 name="role"
                 defaultValue="sublocatario"
-                className="flex h-10 w-full max-w-sm rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
+                className="flex h-10 w-full max-w-sm rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
               >
                 <option value="sublocatario">Dentista sublocatário (cadeira/sala própria)</option>
                 <option value="titular">Titular adicional</option>
               </select>
 
-              <label className="mt-3 flex items-center gap-2 text-sm text-white/70">
+              <label className="mt-3 flex items-center gap-2 text-sm text-foreground/70">
                 <input
                   type="checkbox"
                   checked={comLogin}
                   onChange={(e) => setComLogin(e.target.checked)}
-                  className="h-4 w-4 rounded border-white/20 bg-white/5"
+                  className="h-4 w-4 rounded border-border bg-card"
                 />
                 Criar login próprio para este profissional
               </label>
-              <p className="text-xs text-white/40">
+              <p className="text-xs text-muted-foreground">
                 Sem login, o cadastro serve apenas para agenda/faturamento. Com login, o profissional acessa o
                 sistema e — se for sublocatário — só vê seus próprios pacientes e agendamentos.
               </p>
@@ -128,11 +128,11 @@ export default function NovoProfissionalPage() {
               {comLogin && (
                 <div className="grid gap-4 md:grid-cols-2 mt-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-white/70">E-mail de acesso *</Label>
+                    <Label htmlFor="email" className="text-foreground/70">E-mail de acesso *</Label>
                     <Input id="email" name="email" type="email" placeholder="dentista@clinica.com.br" required={comLogin} />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="senha" className="text-white/70">Senha temporária *</Label>
+                    <Label htmlFor="senha" className="text-foreground/70">Senha temporária *</Label>
                     <Input id="senha" name="senha" type="password" placeholder="Mínimo 6 caracteres" required={comLogin} />
                   </div>
                 </div>

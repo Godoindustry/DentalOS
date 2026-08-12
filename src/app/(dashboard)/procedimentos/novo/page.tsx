@@ -27,8 +27,8 @@ export default function NovoProcedimentoPage() {
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Novo Procedimento</h1>
-          <p className="text-sm text-white/50">Cadastre um novo procedimento com precificação</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Novo Procedimento</h1>
+          <p className="text-sm text-muted-foreground">Cadastre um novo procedimento com precificação</p>
         </div>
       </div>
 
@@ -45,15 +45,15 @@ export default function NovoProcedimentoPage() {
             )}
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="nome_servico" className="text-white/70">Nome do Serviço *</Label>
+                <Label htmlFor="nome_servico" className="text-foreground/70">Nome do Serviço *</Label>
                 <Input id="nome_servico" name="nome_servico" placeholder="Ex: Canal (Endodontia)" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="categoria" className="text-white/70">Categoria *</Label>
+                <Label htmlFor="categoria" className="text-foreground/70">Categoria *</Label>
                 <select
                   id="categoria"
                   name="categoria"
-                  className="flex h-10 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
+                  className="flex h-10 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
                   required
                 >
                   <option value="">Selecione...</option>
@@ -68,23 +68,23 @@ export default function NovoProcedimentoPage() {
                 </select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="codigo_tuss" className="text-white/70">Código TUSS</Label>
+                <Label htmlFor="codigo_tuss" className="text-foreground/70">Código TUSS</Label>
                 <Input id="codigo_tuss" name="codigo_tuss" placeholder="Código ANS" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="tempo_estimado" className="text-white/70">Tempo Estimado (minutos)</Label>
+                <Label htmlFor="tempo_estimado" className="text-foreground/70">Tempo Estimado (minutos)</Label>
                 <Input id="tempo_estimado" name="tempo_estimado" type="number" defaultValue="30" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="preco_venda" className="text-white/70">Preço de Venda (R$) *</Label>
+                <Label htmlFor="preco_venda" className="text-foreground/70">Preço de Venda (R$) *</Label>
                 <Input id="preco_venda" name="preco_venda" type="number" step="0.01" placeholder="0,00" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="custo_insumos" className="text-white/70">Custo com Insumos Diretos (R$)</Label>
+                <Label htmlFor="custo_insumos" className="text-foreground/70">Custo com Insumos Diretos (R$)</Label>
                 <Input id="custo_insumos" name="custo_insumos" type="number" step="0.01" placeholder="0,00" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="custo_laboratorio" className="text-white/70">Custo com Laboratório (R$)</Label>
+                <Label htmlFor="custo_laboratorio" className="text-foreground/70">Custo com Laboratório (R$)</Label>
                 <Input id="custo_laboratorio" name="custo_laboratorio" type="number" step="0.01" placeholder="0,00" />
               </div>
             </div>
