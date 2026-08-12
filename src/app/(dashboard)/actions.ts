@@ -537,53 +537,6 @@ export interface OdontogramaInput {
   }>
 }
 
-export async function salvarAnamnese(_prevState: { error?: string; success?: boolean } | null, formData: FormData) {
-  const supabase = await createClient()
-
-  const clinicaId = await getClinicaId(supabase)
-  if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
-
-  const pacienteId = formData.get("paciente_id") as string
-  const profissionalId = formData.get("profissional_id") as string
-
-  if (!pacienteId || !profissionalId) return { error: "Selecione paciente e profissional" }
-
-  const questoes = [
-    "alergia_medicamento", "qualAlergia",
-    "tratamento_medico", "qualTratamento",
-    "doenca_grave", "qualDoenca",
-    "hospitalizacao", "qualHospitalizacao",
-    "problema_cardiovascular", "qualProblemaCardiovascular",
-    "problema_metabolico", "qualProblemaMetabolico",
-    "problema_respiratorio", "qualProblemaRespiratorio",
-    "gravida", "qualGravidez",
-    "habitos", "quaisHabitos",
-    "outros_problemas", "quaisOutrosProblemas",
-    "dor_atual", "qualDor",
-    "tratamento_anterior", "qualTratamentoAnterior",
-    "medo_dentista",
-    "satisfeito_aparencia", "qualInsatisfacao",
-  ]
-
-  const questionario: Record<string, string> = {}
-  for (const q of questoes) {
-    const val = formData.get(q) as string
-    if (val) questionario[q] = val
-  }
-
-  const { error } = await supabase.from("anamneses").insert({
-    paciente_id: pacienteId,
-    profissional_id: profissionalId,
-    questionario_respondido: questionario,
-    assinatura_digital_hash: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
-  })
-
-  if (error) return { error: error.message }
-
-  revalidatePath("/anamnese")
-  return { success: true }
-}
-
 export async function converterPacientePotencial(
   _prevState: { error?: string; success?: boolean } | null,
   formData: FormData
@@ -855,5 +808,294 @@ export async function marcarCroVerificado(profissionalId: string) {
   if (error) return { error: error.message }
 
   revalidatePath("/profissionais")
+  return { success: true }
+}
+
+// =============================================
+// NOVAS FUNCIONALIDADES: BOT, LGPD, URGÊNCIA, EXPORTAÇÃO
+// =============================================
+
+export async function aprovarLeadEPaciente(_prevState: { error?: string; success?: boolean } | null, formData: FormData) {
+  const supabase = await createClient()
+  const admin = createAdminClient()
+  const clinicaId = await getClinicaId(supabase)
+  if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
+
+  const potencialId = formData.get("potencial_id") as string
+  const nome = formData.get("nome") as string
+  const cpf = formData.get("cpf") as string || null
+  const data_nascimento = formData.get("data_nascimento") as string
+  const sexo = formData.get("sexo") as string || null
+  const telefone = formData.get("telefone") as string
+  const email = formData.get("email") as string || null
+  const cep = formData.get("cep") as string || null
+  const logradouro = formData.get("logradouro") as string || null
+  const numero = formData.get("numero") as string || null
+  const bairro = formData.get("bairro") as string || null
+  const cidade = formData.get("cidade") as string || null
+  const uf = formData.get("uf") as string || null
+  const responsavel = formData.get("responsavel") as string || null
+  const observacoes = formData.get("observacoes") as string || null
+  const origem = formData.get("origem") as string || "bot_whatsapp"
+
+  if (!potencialId || !nome || !telefone || !data_nascimento) {
+    return { error: "Preencha todos os campos obrigatórios" }
+  }
+
+  const { data: potencial } = await admin
+    .from("pacientes_potenciais")
+    .select("*")
+    .eq("id", potencialId)
+    .eq("clinica_id", clinicaId)
+    .maybeSingle()
+
+  if (!potencial) {
+    return { error: "Lead não encontrado ou não pertence a esta clínica" }
+  }
+
+  const { data: paciente, error: pacienteError } = await admin
+    .from("pacientes")
+    .insert({
+      clinica_id: clinicaId,
+      nome,
+      cpf: cpf || potencial.cpf || null,
+      data_nascimento: data_nascimento || potencial.data_nascimento || new Date().toISOString().split('T')[0],
+      sexo: sexo || potencial.sexo || null,
+      telefone_whatsapp: telefone || potencial.telefone,
+      email: email || potencial.email || null,
+      cep: cep || potencial.cep || null,
+      logradouro: logradouro || potencial.logradouro || null,
+      numero: numero || null,
+      bairro: bairro || potencial.bairro || null,
+      cidade: cidade || potencial.cidade || null,
+      uf: uf || potencial.uf || null,
+      responsavel_legal: responsavel || potencial.responsavel_legal || null,
+      observacoes_criticas: observacoes || potencial.queixa_principal || null,
+      origem,
+    })
+    .select("id")
+    .single()
+
+  if (pacienteError || !paciente) {
+    return { error: pacienteError?.message || "Erro ao criar paciente" }
+  }
+
+  await admin.from("pacientes_potenciais")
+    .update({ status: "convertido", paciente_id: paciente.id })
+    .eq("id", potencialId)
+
+  revalidatePath("/pacientes-potenciais")
+  return { success: true, paciente_id: paciente.id }
+}
+
+export async function exportarPacientes() {
+  const supabase = await createClient()
+  const admin = createAdminClient()
+  const clinicaId = await getClinicaId(supabase)
+  if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
+
+  const { data: pacientes, error } = await admin
+    .from("pacientes")
+    .select("*")
+    .eq("clinica_id", clinicaId)
+    .order("created_at", { ascending: false })
+
+  if (error) return { error: error.message }
+  if (!pacientes || pacientes.length === 0) return { error: "Nenhum paciente encontrado" }
+
+  const csvHeader = "Nome,CPF,Data Nascimento,Sexo,Telefone,Email,CEP,Logradouro,Número,Bairro,Cidade,UF,Responsável,Observações,Origem,Data Cadastro\n"
+  const csvRows = pacientes.map((p) => {
+    const row = [
+      p.nome || "",
+      p.cpf || "",
+      p.data_nascimento || "",
+      p.sexo || "",
+      p.telefone_whatsapp || "",
+      p.email || "",
+      p.cep || "",
+      p.logradouro || "",
+      p.numero || "",
+      p.bairro || "",
+      p.cidade || "",
+      p.uf || "",
+      (p.responsavel_legal || "").replace(/"/g, '""'),
+      (p.observacoes_criticas || "").replace(/"/g, '""'),
+      p.origem || "",
+      p.created_at || "",
+    ].map((v) => `"${v}"`).join(",")
+    return row
+  }).join("\n")
+
+  const csv = csvHeader + csvRows
+  const base64 = Buffer.from(csv, "utf-8").toString("base64")
+  const filename = `pacientes-clinica-${clinicaId}-${new Date().toISOString().split('T')[0]}.csv`
+
+  return { success: true, csv, filename, total: pacientes.length }
+}
+
+export async function cadastrarPacienteManual(_prevState: { error?: string; success?: boolean } | null, formData: FormData) {
+  const supabase = await createClient()
+  const admin = createAdminClient()
+  const clinicaId = await getClinicaId(supabase)
+  if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
+
+  const nome = formData.get("nome") as string
+  const cpf = formData.get("cpf") as string || null
+  const data_nascimento = formData.get("data_nascimento") as string
+  const sexo = formData.get("sexo") as string || null
+  const telefone = formData.get("telefone") as string
+  const email = formData.get("email") as string || null
+  const cep = formData.get("cep") as string || null
+  const logradouro = formData.get("logradouro") as string || null
+  const numero = formData.get("numero") as string || null
+  const bairro = formData.get("bairro") as string || null
+  const cidade = formData.get("cidade") as string || null
+  const uf = formData.get("uf") as string || null
+  const responsavel = formData.get("responsavel") as string || null
+  const observacoes = formData.get("observacoes") as string || null
+
+  if (!nome || !telefone || !data_nascimento) {
+    return { error: "Preencha nome, telefone e data de nascimento" }
+  }
+
+  const { error } = await admin.from("pacientes").insert({
+    clinica_id: clinicaId,
+    nome,
+    cpf,
+    data_nascimento,
+    sexo,
+    telefone_whatsapp: telefone,
+    email,
+    cep,
+    logradouro,
+    numero,
+    bairro,
+    cidade,
+    uf,
+    responsavel_legal: responsavel,
+    observacoes_criticas: observacoes,
+    origem: "manual",
+  })
+
+  if (error) return { error: error.message }
+
+  revalidatePath("/pacientes")
+  return { success: true }
+}
+
+export async function salvarAnamnese(_prevState: { error?: string; success?: boolean } | null, formData: FormData) {
+  const supabase = await createClient()
+  const admin = createAdminClient()
+  const clinicaId = await getClinicaId(supabase)
+  if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
+
+  const pacienteId = formData.get("paciente_id") as string
+  const profissionalId = formData.get("profissional_id") as string
+  const questionario = formData.get("questionario") as string
+  const assinatura = formData.get("assinatura") as string
+
+  if (!pacienteId || !profissionalId || !questionario) {
+    return { error: "Preencha todos os campos obrigatórios" }
+  }
+
+  const { data: paciente } = await admin
+    .from("pacientes")
+    .select("clinica_id")
+    .eq("id", pacienteId)
+    .maybeSingle()
+
+  if (!paciente || paciente.clinica_id !== clinicaId) {
+    return { error: "Paciente não encontrado ou não pertence a esta clínica" }
+  }
+
+  const assinaturaHash = assinatura
+    ? Buffer.from(assinatura + pacienteId + profissionalId).toString("base64")
+    : Buffer.from(questionario + pacienteId + profissionalId).toString("base64")
+
+  const { error } = await supabase.from("anamneses").insert({
+    paciente_id: pacienteId,
+    profissional_id: profissionalId,
+    questionario_respondido: JSON.parse(questionario),
+    assinatura_digital_hash: assinaturaHash,
+  })
+
+  if (error) return { error: error.message }
+
+  revalidatePath(`/anamnese/${pacienteId}`)
+  return { success: true }
+}
+
+export async function atualizarTelefoneUrgencia(profissionalId: string, telefoneUrgencia: string) {
+  const supabase = await createClient()
+  const admin = createAdminClient()
+  const clinicaId = await getClinicaId(supabase)
+  if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
+
+  const { data: profissional } = await admin
+    .from("profissionais")
+    .select("clinica_id")
+    .eq("id", profissionalId)
+    .maybeSingle()
+
+  if (!profissional || profissional.clinica_id !== clinicaId) {
+    return { error: "Profissional não encontrado ou não pertence a esta clínica" }
+  }
+
+  const telefoneLimpo = telefoneUrgencia.replace(/\D/g, "")
+
+  const { error } = await admin
+    .from("profissionais")
+    .update({ telefone_urgencia: telefoneLimpo })
+    .eq("id", profissionalId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath("/configuracoes")
+  return { success: true }
+}
+
+export async function registrarConsentimentoLGPD(pacienteId: string, tipo: string, versao: string, consentido: boolean, ip?: string, userAgent?: string) {
+  const supabase = await createClient()
+  const admin = createAdminClient()
+  const clinicaId = await getClinicaId(supabase)
+  if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
+
+  const { error } = await admin.from("lgpd_consentimentos").insert({
+    clinica_id: clinicaId,
+    paciente_id: pacienteId || null,
+    tipo_consentimento: tipo,
+    versao_termo: versao,
+    consentido,
+    ip_address: ip || null,
+    user_agent: userAgent || null,
+  })
+
+  if (error) return { error: error.message }
+
+  if (pacienteId && consentido) {
+    await admin.from("pacientes_potenciais")
+      .update({ lgpd_consentimento: true, lgpd_consentimento_em: new Date().toISOString() })
+      .eq("id", pacienteId)
+  }
+
+  return { success: true }
+}
+
+export async function solicitarExclusaoLGPD(pacienteId: string, tipo: string, motivo?: string) {
+  const supabase = await createClient()
+  const admin = createAdminClient()
+  const clinicaId = await getClinicaId(supabase)
+  if (!clinicaId) return { error: "Usuário não vinculado a uma clínica" }
+
+  const { error } = await admin.from("lgpd_solicitacoes").insert({
+    clinica_id: clinicaId,
+    paciente_id: pacienteId,
+    tipo,
+    motivo: motivo || null,
+    status: "pendente",
+  })
+
+  if (error) return { error: error.message }
+
   return { success: true }
 }

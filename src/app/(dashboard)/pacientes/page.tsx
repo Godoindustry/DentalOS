@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Plus, Search, User, Calendar } from "lucide-react"
+import { Plus, Search, User, Calendar, Download } from "lucide-react"
 import { usePacientes, calculateAge } from "@/lib/queries"
 
 export default function PacientesPage() {
@@ -44,12 +44,20 @@ export default function PacientesPage() {
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Pacientes</h1>
           <p className="text-sm text-muted-foreground">Gerencie o cadastro de pacientes da clínica</p>
         </div>
-        <Button asChild>
-          <Link href="/pacientes/novo">
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Paciente
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link href="/pacientes/exportar">
+              <Download className="mr-2 h-4 w-4" />
+              Exportar CSV
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link href="/pacientes/manual">
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Paciente
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <Card>

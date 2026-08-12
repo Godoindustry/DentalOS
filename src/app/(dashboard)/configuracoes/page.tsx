@@ -14,10 +14,12 @@ import {
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Building2, Bell, Shield, Palette, Check, User } from "lucide-react"
+import { Building2, Bell, Shield, Palette, Check, User, FileText } from "lucide-react"
+import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { salvarClinica, salvarPerfil, salvarConfiguracaoBot } from "../actions"
 import { TestBotButton } from "@/components/test-bot-button"
+import { registrarConsentimentoLGPD, solicitarExclusaoLGPD } from "@/app/(dashboard)/actions"
 
 const supabase = createClient()
 
@@ -31,6 +33,7 @@ export default function ConfiguracoesPage() {
   const [state, formAction, pending] = useActionState(salvarClinica, null)
   const [perfilState, perfilAction, perfilPending] = useActionState(salvarPerfil, null)
   const [botState, botAction, botPending] = useActionState(salvarConfiguracaoBot, null)
+  const [lgpdState, lgpdAction, lgpdPending] = useActionState(async () => ({ success: true }), null)
 
   useEffect(() => {
     setOrigin(typeof window !== "undefined" ? window.location.origin : "")
@@ -69,7 +72,7 @@ export default function ConfiguracoesPage() {
       if (user) {
         const { data: profissional } = await supabase
           .from("profissionais")
-          .select("nome, especialidade_principal, cro, uf_cro")
+          .select("nome, especialidade_principal, cro, uf_cro, telefone_urgencia")
           .eq("user_id", user.id)
           .maybeSingle()
         setPerfil({
@@ -77,6 +80,7 @@ export default function ConfiguracoesPage() {
           especialidade: profissional?.especialidade_principal ?? "",
           cro: profissional?.cro ?? "",
           uf_cro: profissional?.uf_cro ?? "",
+          telefone_urgencia: profissional?.telefone_urgencia ?? "",
         })
       }
 
@@ -113,6 +117,10 @@ export default function ConfiguracoesPage() {
           <TabsTrigger value="aparencia" className="flex items-center gap-2">
             <Palette className="h-4 w-4" />
             Aparência
+          </TabsTrigger>
+          <TabsTrigger value="lgpd" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            LGPD
           </TabsTrigger>
         </TabsList>
 
@@ -159,6 +167,18 @@ export default function ConfiguracoesPage() {
                       <div className="space-y-2">
                         <Label htmlFor="uf_cro" className="text-foreground/70">UF do CRO</Label>
                         <Input id="uf_cro" name="uf_cro" defaultValue={perfil?.uf_cro ?? ""} maxLength={2} />
+                      </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="telefone_urgencia" className="text-foreground/70">Telefone para Urgências</Label>
+                        <Input
+                          id="telefone_urgencia"
+                          name="telefone_urgencia"
+                          defaultValue={perfil?.telefone_urgencia ?? ""}
+                          placeholder="(11) 90000-0000"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Quando um paciente selecionar "Atendimento Urgente" no bot, o contato será direcionado para este número.
+                        </p>
                       </div>
                     </div>
                     <Button type="submit" disabled={perfilPending}>
@@ -442,6 +462,49 @@ export default function ConfiguracoesPage() {
               <p className="text-sm text-muted-foreground">
                 Em breve: tema claro/escuro e customização de marca.
               </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="lgpd">
+          <Card>
+            <CardHeader>
+              <CardTitle>LGPD e Privacidade</CardTitle>
+              <CardDescription>
+                Gerencie consentimentos e solicitações de dados pessoais
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="rounded-xl border border-border bg-card p-4 space-y-2">
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Consentimento</p>
+                  <p className="text-xs text-muted-foreground">
+                    Registre o consentimento do paciente para tratamento de dados.
+                  </p>
+                  <Button variant="outline" className="w-full" disabled>
+                    <FileText className="mr-2 h-4 w-4" />
+                    Ver Consentimentos
+                  </Button>
+                </div>
+                <div className="rounded-xl border border-border bg-card p-4 space-y-2">
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Exportar Dados</p>
+                  <p className="text-xs text-muted-foreground">
+                    Exporte dados dos pacientes para cumprimento de portabilidade.
+                  </p>
+                  <Button variant="outline" className="w-full" asChild>
+                    <Link href="/pacientes/exportar">Exportar CSV</Link>
+                  </Button>
+                </div>
+                <div className="rounded-xl border border-border bg-card p-4 space-y-2">
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Exclusão</p>
+                  <p className="text-xs text-muted-foreground">
+                    Solicite exclusão de dados pessoais (direito ao esquecimento).
+                  </p>
+                  <Button variant="outline" className="w-full" asChild>
+                    <Link href="/lgpd">Gerenciar Solicitações</Link>
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
