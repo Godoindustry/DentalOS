@@ -53,7 +53,7 @@ function ThemeToggle() {
 export function Header() {
   const [showNotifications, setShowNotifications] = useState(false)
   const [usuario, setUsuario] = useState({ nome: "Usuario", especialidade: "Profissional", role: "titular" })
-  const { collapsed, setCollapsed } = useSidebar()
+  const { toggleSidebar } = useSidebar()
   const router = useRouter()
   const searchInputRef = useRef<HTMLInputElement>(null)
 
@@ -108,14 +108,14 @@ export function Header() {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-slate-200 bg-white/90 px-4 backdrop-blur-md md:px-6">
       <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-800"
+        onClick={toggleSidebar}
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-800"
       >
         <Menu className="h-5 w-5" />
       </button>
 
       {/* Global Search Bar */}
-      <div className="flex-1 max-w-2xl mx-auto flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-xl border border-transparent focus-within:border-teal-500 focus-within:bg-white transition-all shadow-inner">
+      <div className="hidden flex-1 max-w-2xl mx-auto items-center gap-2 px-4 py-2 bg-slate-100 rounded-xl border border-transparent focus-within:border-teal-500 focus-within:bg-white transition-all shadow-inner sm:flex">
         <Search className="w-4 h-4 text-slate-400" />
         <input
           ref={searchInputRef}
@@ -127,19 +127,20 @@ export function Header() {
           ⌘K
         </div>
       </div>
+      <div className="flex-1 sm:hidden" />
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
         <ThemeToggle />
 
         <Link
           href="/bot"
-          className="relative flex h-10 w-10 items-center justify-center rounded-xl text-muted-foreground transition-all hover:bg-accent hover:text-foreground"
+          className="relative hidden h-10 w-10 items-center justify-center rounded-xl text-muted-foreground transition-all hover:bg-accent hover:text-foreground sm:flex"
           aria-label="Assistente Virtual"
         >
           <MessageCircle className="h-5 w-5" />
         </Link>
 
-        <div className="relative">
+        <div className="relative hidden sm:block">
           <button
             onClick={() => setShowNotifications(!showNotifications)}
             className="relative flex h-10 w-10 items-center justify-center rounded-xl text-muted-foreground transition-all hover:bg-accent hover:text-foreground"

@@ -39,7 +39,7 @@ const sidebarItems = [
 ]
 
 export function Sidebar() {
-  const { collapsed, setCollapsed } = useSidebar()
+  const { collapsed, setCollapsed, mobileOpen, setMobileOpen, isMobile } = useSidebar()
   const pathname = usePathname()
   const [mounted, setMounted] = useState(false)
   const [nomeClinica, setNomeClinica] = useState<string | null>(null)
@@ -52,15 +52,34 @@ export function Sidebar() {
     })
   }, [])
 
+  // Fecha o menu mobile automaticamente ao trocar de página
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [pathname, setMobileOpen])
+
+  const effectiveCollapsed = isMobile ? false : collapsed
+
   return (
-    <motion.aside
-      animate={{ width: collapsed ? 72 : 256 }}
-      transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-      className="fixed left-0 top-0 z-40 h-screen overflow-hidden flex flex-col border-r border-slate-200 bg-white"
-    >
+    <>
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+      <motion.aside
+        animate={{ width: effectiveCollapsed ? 72 : 256 }}
+        transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+        style={{
+          transform: isMobile && !mobileOpen ? "translateX(-100%)" : "translateX(0)",
+          transition: "transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)",
+        }}
+        className="fixed left-0 top-0 z-50 h-screen overflow-hidden flex flex-col border-r border-slate-200 bg-white md:z-40"
+      >
       <div className="flex h-16 items-center gap-3 border-b border-slate-100 px-4">
         <motion.div
-          animate={{ rotate: collapsed ? 180 : 0 }}
+          animate={{ rotate: effectiveCollapsed ? 180 : 0 }}
           transition={{ duration: 0.3 }}
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#00C49F]/10 text-[#00C49F]"
         >
@@ -68,7 +87,7 @@ export function Sidebar() {
         </motion.div>
         {mounted ? (
           <AnimatePresence mode="wait">
-            {!collapsed && (
+            {!effectiveCollapsed && (
               <motion.span
                 initial={{ opacity: 0, width: 0 }}
                 animate={{ opacity: 1, width: "auto" }}
@@ -84,10 +103,10 @@ export function Sidebar() {
           <span className="font-bold text-lg text-slate-800 truncate">DentalOS</span>
         )}
         <button
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={() => (isMobile ? setMobileOpen(false) : setCollapsed(!collapsed))}
           className="ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"
         >
-          <ChevronLeft className={cn("h-4 w-4 transition-transform duration-300", collapsed && "rotate-180")} />
+          <ChevronLeft className={cn("h-4 w-4 transition-transform duration-300", effectiveCollapsed && "rotate-180")} />
         </button>
       </div>
 
@@ -109,7 +128,7 @@ export function Sidebar() {
               <item.icon className="relative z-10 h-5 w-5 shrink-0" />
               {mounted ? (
                 <AnimatePresence mode="wait">
-                  {!collapsed && (
+                  {!effectiveCollapsed && (
                     <motion.span
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -131,7 +150,7 @@ export function Sidebar() {
 
       {/* Footer Unit Selector */}
       <div className="p-4 border-t border-slate-100 bg-slate-50">
-        {!collapsed ? (
+        {!effectiveCollapsed ? (
           <div className="flex flex-col">
             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Unidade Atual</span>
             <span className="text-xs font-semibold text-slate-700 truncate">{nomeClinica ?? "Carregando..."}</span>
@@ -141,6 +160,7 @@ export function Sidebar() {
         )}
       </div>
 
-    </motion.aside>
+      </motion.aside>
+    </>
   )
 }
