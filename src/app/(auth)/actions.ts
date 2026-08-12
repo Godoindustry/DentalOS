@@ -68,33 +68,9 @@ export async function loginAction(_prevState: { error: string } | null, formData
     await supabase.auth.refreshSession()
   }
 
-  const isMaster = user.user_metadata?.role === "ADMIN"
-
-  if (!isMaster) {
-    const admin2 = createAdminClient()
-    clinicaId = user.user_metadata?.clinica_id
-    if (clinicaId) {
-      const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString()
-      const { data: license } = await admin2
-        .from("licencas")
-        .select("usada_em")
-        .eq("clinica_id", clinicaId)
-        .eq("usada", true)
-        .gte("usada_em", fourteenDaysAgo)
-        .maybeSingle()
-
-      if (!license) {
-        const precosUrl = new URL("/precos", "http://localhost")
-        precosUrl.searchParams.set("message", "Ative uma licenca para acessar o sistema")
-        redirect(precosUrl.toString())
-      }
-    } else {
-      const precosUrl = new URL("/precos", "http://localhost")
-      precosUrl.searchParams.set("message", "Ative uma licenca para acessar o sistema")
-      redirect(precosUrl.toString())
-    }
-  }
-
+  // A checagem de licença já é feita pelo proxy.ts (middleware) em toda
+  // navegação subsequente, usando a URL real da requisição — não duplicar
+  // aqui evita o bug de redirecionar para um host fixo/errado.
   redirect("/dashboard")
 }
 

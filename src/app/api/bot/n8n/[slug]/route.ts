@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-import { createHmac } from "crypto";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { createHmac, timingSafeEqual } from "crypto";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(
   request: Request,
@@ -10,7 +11,15 @@ export async function POST(
     const { slug } = await params;
     console.log(`[n8n-webhook] Recebida requisição para slug: ${slug}`);
 
-    const supabase = await createClient();
+    const clientIp = getClientIp(request)
+    if (!rateLimit(`n8n-webhook:${clientIp}`, 60, 60_000)) {
+      return NextResponse.json({ error: "Muitas requisições" }, { status: 429 })
+    }
+
+    // Autenticação é via assinatura HMAC (abaixo), não sessão de usuário —
+    // esta chamada vem do n8n, sem cookies de login. Precisa do client
+    // admin (service role) para não esbarrar em RLS.
+    const supabase = createAdminClient();
 
     const { data: config, error: configError } = await supabase
       .from("configuracoes_bot")
@@ -38,8 +47,10 @@ export async function POST(
       const expectedSignature = createHmac("sha256", config.n8n_webhook_secret)
         .update(body)
         .digest("hex");
-      console.log(`[n8n-webhook] Signature esperada: ${expectedSignature}`);
-      if (signature !== expectedSignature) {
+      const signatureBuf = Buffer.from(signature, "hex")
+      const expectedBuf = Buffer.from(expectedSignature, "hex")
+      const isValid = signatureBuf.length === expectedBuf.length && timingSafeEqual(signatureBuf, expectedBuf)
+      if (!isValid) {
         console.log(`[n8n-webhook] Assinatura inválida`);
         return NextResponse.json({ error: "Assinatura inválida" }, { status: 403 });
       }
@@ -101,7 +112,6 @@ export async function POST(
           ultima_interacao: new Date().toISOString(),
           ultima_mensagem: message.slice(0, 500),
           etapa_atual: etapa || "inicio",
-          origem: "bot",
         })
         .select("id")
         .single();

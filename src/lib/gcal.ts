@@ -1,6 +1,5 @@
 import { google } from 'googleapis';
 import { createAdminClient } from './supabase/admin';
-import { createClient } from './supabase/server';
 
 const CALLBACK_URL = process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/google/callback';
 
@@ -10,103 +9,31 @@ export const oauth2Client = new google.auth.OAuth2(
   CALLBACK_URL
 );
 
-export function getGoogleAuthUrl(redirectAfterAuth: string, baseUrl: string) {
-  const scopes = [
-    'https://www.googleapis.com/auth/calendar.events',
-    'https://www.googleapis.com/auth/userinfo.email',
-    'https://www.googleapis.com/auth/userinfo.profile',
-  ];
+/**
+ * Fluxo de conexão do Google Calendar a uma clínica já autenticada no
+ * DentalOS — NÃO é um mecanismo de login/criação de conta. `clinicaId`
+ * deve vir da sessão do usuário já logado (ver /api/auth/google/route.ts).
+ */
+export function getGoogleAuthUrl(clinicaId: string) {
+  const scopes = ['https://www.googleapis.com/auth/calendar.events'];
   return oauth2Client.generateAuthUrl({
     access_type: 'offline',
     prompt: 'consent',
     scope: scopes,
-    state: JSON.stringify({ redirect: redirectAfterAuth, baseUrl }),
+    state: clinicaId,
   });
 }
 
-export async function handleGoogleCallback(code: string, state: string) {
-  let redirectAfterAuth = '/dashboard';
-  let baseUrl = '';
-
-  try {
-    const parsed = JSON.parse(state);
-    redirectAfterAuth = parsed.redirect || '/dashboard';
-    baseUrl = parsed.baseUrl || '';
-  } catch {
-    // state legado (apenas clinicaId)
-  }
-
+export async function handleGoogleCallback(code: string, clinicaId: string) {
   const { tokens } = await oauth2Client.getToken(code);
-
   const admin = createAdminClient();
 
-  if (!tokens.access_token) {
-    throw new Error('Token de acesso não recebido do Google');
-  }
+  await admin.from('configuracoes_bot').update({
+    google_refresh_token: tokens.refresh_token,
+    google_access_token: tokens.access_token,
+  }).eq('clinica_id', clinicaId);
 
-  const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-    headers: { Authorization: `Bearer ${tokens.access_token}` },
-  });
-
-  if (!userInfoRes.ok) {
-    throw new Error('Falha ao obter dados do usuário Google');
-  }
-
-  const userInfo = await userInfoRes.json();
-  const email = userInfo.email;
-  const nome = userInfo.name || email.split('@')[0];
-
-  if (!email) {
-    throw new Error('E-mail não fornecido pelo Google');
-  }
-
-  const { data: existingUser } = await admin.auth.admin.listUsers();
-  const authUser = existingUser?.users?.find((u) => u.email === email);
-
-  let clinicaId: string | undefined;
-
-  if (authUser) {
-    clinicaId = authUser.user_metadata?.clinica_id as string | undefined;
-  } else {
-    const { data: newClinica } = await admin
-      .from('clinicas')
-      .insert({ nome_fantasia: `Clínica de ${nome}`, plano_assinatura: 'basic' })
-      .select('id')
-      .single();
-
-    if (!newClinica) {
-      throw new Error('Falha ao criar clínica para novo usuário Google');
-    }
-
-    clinicaId = newClinica.id;
-
-    const { data: newAuthUser, error: authError } = await admin.auth.admin.createUser({
-      email,
-      email_confirm: true,
-      user_metadata: { nome, clinica_id: clinicaId, role: 'titular' },
-    });
-
-    if (authError || !newAuthUser?.user) {
-      await admin.from('clinicas').delete().eq('id', clinicaId);
-      throw new Error(authError?.message || 'Falha ao criar usuário no Supabase Auth');
-    }
-
-    await admin.from('profissionais').insert({
-      clinica_id: clinicaId,
-      user_id: newAuthUser.user.id,
-      nome,
-      role: 'titular',
-    });
-  }
-
-  if (baseUrl && clinicaId) {
-    await admin.from('configuracoes_bot').update({
-      google_refresh_token: tokens.refresh_token,
-      google_access_token: tokens.access_token,
-    }).eq('clinica_id', clinicaId);
-  }
-
-  return { tokens, redirectAfterAuth, clinicaId };
+  return tokens;
 }
 
 export async function createGoogleCalendarEvent({
